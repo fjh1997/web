@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"c:/Users/54930/Desktop/yxxl\" log --oneline -10)",
+      "Bash(wrangler --version)",
+      "Bash(npx wrangler --version)"
+    ]
+  }
+}
