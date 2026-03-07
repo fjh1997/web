@@ -28,7 +28,7 @@ export default {
 
     if (url.pathname === '/api/oauth/token' && request.method === 'POST') {
       try {
-        const { code } = await request.json();
+        const { code, code_verifier } = await request.json();
 
         if (!code) {
           return new Response(JSON.stringify({ error: 'Missing code parameter' }), {
@@ -37,18 +37,21 @@ export default {
           });
         }
 
-        // Exchange code for access token
+        // Exchange code for access token (GitHub App with PKCE)
+        const tokenBody = {
+          client_id: env.GITHUB_CLIENT_ID,
+          client_secret: env.GITHUB_CLIENT_SECRET,
+          code: code,
+        };
+        if (code_verifier) tokenBody.code_verifier = code_verifier;
+
         const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           },
-          body: JSON.stringify({
-            client_id: env.GITHUB_CLIENT_ID,
-            client_secret: env.GITHUB_CLIENT_SECRET,
-            code: code,
-          }),
+          body: JSON.stringify(tokenBody),
         });
 
         const tokenData = await tokenResponse.json();

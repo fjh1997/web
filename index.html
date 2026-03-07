@@ -2196,13 +2196,36 @@
             } catch { return false; }
         }
 
-        // ========== OAuth 流程 ==========
-        function startGitHubLogin() {
-            const state = Math.random().toString(36).substring(2);
+        // ========== OAuth 流程 (GitHub App + PKCE) ==========
+        function generateRandomString(length) {
+            const arr = new Uint8Array(length);
+            crypto.getRandomValues(arr);
+            return Array.from(arr, b => b.toString(36).padStart(2, '0')).join('').substring(0, length);
+        }
+
+        async function generateCodeChallenge(verifier) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(verifier);
+            const digest = await crypto.subtle.digest('SHA-256', data);
+            return btoa(String.fromCharCode(...new Uint8Array(digest)))
+                .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        async function startGitHubLogin() {
+            const state = generateRandomString(32);
+            const codeVerifier = generateRandomString(64);
             sessionStorage.setItem('oauth_state', state);
+            sessionStorage.setItem('oauth_code_verifier', codeVerifier);
+            const codeChallenge = await generateCodeChallenge(codeVerifier);
             const redirectUri = window.location.origin + window.location.pathname;
-            const url = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`;
-            window.location.href = url;
+            const params = new URLSearchParams({
+                client_id: GITHUB_CLIENT_ID,
+                redirect_uri: redirectUri,
+                state: state,
+                code_challenge: codeChallenge,
+                code_challenge_method: 'S256'
+            });
+            window.location.href = `https://github.com/login/oauth/authorize?${params}`;
         }
 
         async function handleOAuthCallback() {
@@ -2217,7 +2240,9 @@
                 history.replaceState({}, '', window.location.pathname);
                 return;
             }
+            const codeVerifier = sessionStorage.getItem('oauth_code_verifier');
             sessionStorage.removeItem('oauth_state');
+            sessionStorage.removeItem('oauth_code_verifier');
             history.replaceState({}, '', window.location.pathname);
 
             const btn = document.getElementById('githubLoginBtn');
@@ -2228,7 +2253,7 @@
                 const resp = await fetch(`${OAUTH_WORKER_URL}/api/oauth/token`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code })
+                    body: JSON.stringify({ code, code_verifier: codeVerifier })
                 });
                 const data = await resp.json();
                 if (data.access_token) {
