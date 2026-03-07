@@ -1,76 +1,83 @@
-// GitHub OAuth Token Exchange Proxy for Cloudflare Workers
-// 部署步骤：
-// 1. 安装 wrangler: npm install -g wrangler
-// 2. 登录: wrangler login
-// 3. 设置 secrets:
-//    wrangler secret put GITHUB_CLIENT_ID
-//    wrangler secret put GITHUB_CLIENT_SECRET
-//    wrangler secret put ALLOWED_ORIGIN
-// 4. 部署: wrangler deploy
+// GitHub OAuth + API Proxy for Cloudflare Workers
+// 功能：1. OAuth token 交换  2. GitHub API 代理加速（国内加速）
 
 export default {
   async fetch(request, env) {
     const allowedOrigin = env.ALLOWED_ORIGIN || '*';
 
-    // CORS headers
     const corsHeaders = {
       'Access-Control-Allow-Origin': allowedOrigin,
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     };
 
-    // Handle CORS preflight
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: corsHeaders });
     }
 
     const url = new URL(request.url);
 
+    // ===== OAuth token 交换 =====
     if (url.pathname === '/api/oauth/token' && request.method === 'POST') {
       try {
         const { code, code_verifier } = await request.json();
-
         if (!code) {
-          return new Response(JSON.stringify({ error: 'Missing code parameter' }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json', ...corsHeaders },
-          });
+          return jsonResp({ error: 'Missing code parameter' }, 400, corsHeaders);
         }
 
-        // Exchange code for access token (GitHub App with PKCE)
         const tokenBody = {
           client_id: env.GITHUB_CLIENT_ID,
           client_secret: env.GITHUB_CLIENT_SECRET,
-          code: code,
+          code,
         };
         if (code_verifier) tokenBody.code_verifier = code_verifier;
 
         const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify(tokenBody),
         });
 
         const tokenData = await tokenResponse.json();
-
-        return new Response(JSON.stringify(tokenData), {
-          status: tokenResponse.ok ? 200 : 400,
-          headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        });
-      } catch (err) {
-        return new Response(JSON.stringify({ error: 'Token exchange failed' }), {
-          status: 500,
-          headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        });
+        return jsonResp(tokenData, tokenResponse.ok ? 200 : 400, corsHeaders);
+      } catch {
+        return jsonResp({ error: 'Token exchange failed' }, 500, corsHeaders);
       }
     }
 
-    return new Response(JSON.stringify({ error: 'Not Found' }), {
-      status: 404,
-      headers: { 'Content-Type': 'application/json', ...corsHeaders },
-    });
+    // ===== GitHub API 代理 =====
+    if (url.pathname.startsWith('/api/github/')) {
+      const githubPath = url.pathname.replace('/api/github/', '');
+      const githubUrl = `https://api.github.com/${githubPath}${url.search}`;
+
+      const headers = {
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'cloudflare-worker-proxy',
+      };
+      const authHeader = request.headers.get('Authorization');
+      if (authHeader) headers['Authorization'] = authHeader;
+
+      try {
+        const ghResp = await fetch(githubUrl, {
+          method: request.method,
+          headers,
+          body: ['GET', 'HEAD'].includes(request.method) ? undefined : await request.text(),
+        });
+
+        const respHeaders = { ...corsHeaders, 'Content-Type': ghResp.headers.get('Content-Type') || 'application/json' };
+        return new Response(ghResp.body, { status: ghResp.status, headers: respHeaders });
+      } catch {
+        return jsonResp({ error: 'GitHub API proxy failed' }, 502, corsHeaders);
+      }
+    }
+
+    return jsonResp({ error: 'Not Found' }, 404, corsHeaders);
   },
 };
+
+function jsonResp(data, status, corsHeaders) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json', ...corsHeaders },
+  });
+}

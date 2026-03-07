@@ -2063,7 +2063,8 @@
         const OAUTH_WORKER_URL = 'https://github-oauth-proxy.fjh1997.workers.dev';
         const GITHUB_CLIENT_ID = 'Iv23livknmABGwCaBIk7';
         const RAW_BASE = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}`;
-        const API_BASE = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`;
+        const API_BASE = `${OAUTH_WORKER_URL}/api/github/repos/${GITHUB_OWNER}/${GITHUB_REPO}`;
+        const USER_API = `${OAUTH_WORKER_URL}/api/github/user`;
 
         // ========== 默认数据（fallback） ==========
         const defaultAnnouncements = [
@@ -2288,7 +2289,7 @@
             }
 
             try {
-                const resp = await githubApiFetch('https://api.github.com/user');
+                const resp = await githubApiFetch(USER_API);
                 if (resp.ok) githubUser = await resp.json();
             } catch {}
 
