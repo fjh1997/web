@@ -2116,8 +2116,15 @@
 
         async function readJsonFromGitHub(path) {
             try {
-                const resp = await fetch(`${RAW_BASE}/${path}?t=${Date.now()}`);
-                if (resp.ok) return await resp.json();
+                // 优先用 GitHub API 读取（无缓存，始终最新）
+                const apiResp = await githubApiFetch(`${API_BASE}/contents/${path}?ref=${GITHUB_BRANCH}`);
+                if (apiResp.ok) {
+                    const data = await apiResp.json();
+                    return JSON.parse(decodeURIComponent(escape(atob(data.content.replace(/\n/g, '')))));
+                }
+                // 降级：用 raw URL
+                const rawResp = await fetch(`${RAW_BASE}/${path}?t=${Date.now()}`);
+                if (rawResp.ok) return await rawResp.json();
                 return null;
             } catch { return null; }
         }
