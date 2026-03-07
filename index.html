@@ -1,0 +1,2349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>印象校联 - 始于1999 · 用心服务每一所校园</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #10b981;
+            --primary-dark: #059669;
+            --accent-color: #F5A623;
+            --text-dark: #0A2C4D;
+            --text-gray: #6b7280;
+            --bg-white: #ffffff;
+            --bg-light: #f8fafc;
+            --bg-gray: #f1f5f9;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 80px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo img {
+            height: 50px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        .logo-text span {
+            color: var(--primary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 35px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            font-size: 15px;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .consult-btn {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .consult-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-dark);
+        }
+
+        /* Banner区 */
+        .banner {
+            height: 700px;
+            background: linear-gradient(135deg, rgba(10, 44, 77, 0.85), rgba(16, 185, 129, 0.75)),
+                        url('pic/1.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.05)" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,213.3C672,192,768,128,864,128C960,128,1056,192,1152,208C1248,224,1344,192,1392,176L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+            background-size: cover;
+            background-position: bottom;
+            opacity: 0.5;
+        }
+
+
+
+        .banner-content {
+            position: relative;
+            z-index: 1;
+            padding: 0 20px;
+            max-width: 1000px;
+            animation: fadeInUp 1s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .banner h1 {
+            font-size: 56px;
+            margin-bottom: 25px;
+            font-weight: 700;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+            letter-spacing: 2px;
+        }
+
+        .banner p {
+            font-size: 22px;
+            margin-bottom: 35px;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+
+        .banner-btn {
+            display: inline-block;
+            padding: 16px 45px;
+            background: white;
+            color: var(--primary-dark);
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            margin: 0 10px;
+        }
+
+        .banner-btn.primary {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .banner-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 通用section样式 */
+        .section {
+            padding: 100px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 70px;
+        }
+
+        .section-title h2 {
+            font-size: 42px;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            position: relative;
+            display: inline-block;
+            font-weight: 700;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+        }
+
+        .section-title p {
+            color: var(--text-gray);
+            font-size: 18px;
+            margin-top: 25px;
+        }
+
+        /* 企业简介 */
+        .about-section {
+            background: white;
+            position: relative;
+        }
+
+
+
+        .about-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .about-text {
+            font-size: 16px;
+            line-height: 2;
+            color: var(--text-gray);
+        }
+
+        .about-text h3 {
+            font-size: 24px;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .about-text p {
+            margin-bottom: 20px;
+        }
+
+        .about-highlight {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+            font-weight: 500;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+        }
+
+        .stat-card {
+            background: var(--bg-light);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .stat-label {
+            font-size: 15px;
+            color: var(--text-gray);
+        }
+
+        /* 核心业务 */
+        .business-section {
+            background: var(--bg-light);
+            position: relative;
+        }
+
+
+
+        .business-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .business-card {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--bg-gray);
+        }
+
+        .business-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .business-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            font-size: 32px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .business-card:hover .business-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .business-card h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .business-card p {
+            color: var(--text-gray);
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        /* 特色服务 */
+        .features-section {
+            background: white;
+            position: relative;
+        }
+
+
+
+        .features-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+        }
+
+        .feature-group h3 {
+            font-size: 24px;
+            color: var(--text-dark);
+            margin-bottom: 25px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-group h3 i {
+            color: var(--accent-color);
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            padding: 15px 0;
+            border-bottom: 1px solid var(--bg-gray);
+            color: var(--text-gray);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 15px;
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-list li i {
+            color: var(--primary-color);
+            font-size: 14px;
+            width: 20px;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, var(--accent-color), #f59e0b);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .highlight-box h4 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .highlight-box p {
+            font-size: 15px;
+            line-height: 1.8;
+            opacity: 0.95;
+        }
+
+        /* 荣誉资质 */
+        .honors-section {
+            background: var(--bg-light);
+            position: relative;
+        }
+
+        .honors-section::before {
+            content: '';
+            position: absolute;
+            top: 30%;
+            left: -50px;
+            width: 150px;
+            height: 150px;
+            background-image: url('1.jpg');
+            background-size: cover;
+            background-position: center;
+            border-radius: 50%;
+            opacity: 0.6;
+            z-index: 0;
+        }
+
+        .honors-section::after {
+            content: '';
+            position: absolute;
+            bottom: 35%;
+            right: -50px;
+            width: 140px;
+            height: 140px;
+            background-image: url('3.png');
+            background-size: cover;
+            background-position: center;
+            border-radius: 50%;
+            opacity: 0.6;
+            z-index: 0;
+        }
+
+        .section-title, .honors-grid {
+            position: relative;
+            z-index: 1;
+        }
+
+        .honors-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .honor-card {
+            background: white;
+            padding: 30px 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid var(--bg-gray);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .honor-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .honor-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .honor-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.15);
+            transform: translateY(-5px);
+        }
+
+        .honor-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 30px;
+            color: white;
+        }
+
+        .honor-card h3 {
+            font-size: 15px;
+            color: var(--text-dark);
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        /* 合作案例 */
+        .partners-section {
+            background: white;
+            position: relative;
+        }
+
+        .partners-section::before {
+            content: '';
+            position: absolute;
+            top: 40%;
+            left: -50px;
+            width: 130px;
+            height: 130px;
+            background-image: url('4.png');
+            background-size: cover;
+            background-position: center;
+            border-radius: 50%;
+            opacity: 0.6;
+            z-index: 0;
+        }
+
+        .partners-section::after {
+            content: '';
+            position: absolute;
+            bottom: 30%;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background-image: url('6.png');
+            background-size: cover;
+            background-position: center;
+            border-radius: 50%;
+            opacity: 0.6;
+            z-index: 0;
+        }
+
+        .section-title, .partners-grid {
+            position: relative;
+            z-index: 1;
+        }
+
+        .partners-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+        }
+
+        .partner-logo {
+            background: white;
+            padding: 25px 15px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid var(--bg-gray);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100px;
+        }
+
+        .partner-logo:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .partner-logo i {
+            font-size: 28px;
+            color: var(--text-gray);
+            margin-bottom: 8px;
+        }
+
+        .partner-logo span {
+            font-size: 12px;
+            color: var(--text-dark);
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        /* 现代理念 */
+        .concept-section {
+            background: linear-gradient(135deg, #0A2C4D, #1a3d5c);
+            color: white;
+            text-align: center;
+            position: relative;
+        }
+
+        .concept-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('2.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.5;
+            z-index: 0;
+        }
+
+        .concept-section::after {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: -60px;
+            width: 180px;
+            height: 180px;
+            background-image: url('7.jpg');
+            background-size: cover;
+            background-position: center;
+            border-radius: 50%;
+            opacity: 0.6;
+            z-index: 0;
+        }
+
+        .section-title, .concept-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-title, .concept-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .concept-section .section-title h2 {
+            color: white;
+        }
+
+        .concept-section .section-title h2::after {
+            background: linear-gradient(90deg, var(--accent-color), #f59e0b);
+        }
+
+        .concept-section .section-title p {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .concept-content {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .concept-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: var(--accent-color);
+        }
+
+        .concept-text {
+            font-size: 18px;
+            line-height: 2;
+            margin-bottom: 40px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .concept-features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .concept-feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .concept-feature i {
+            font-size: 40px;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+        }
+
+        .concept-feature h4 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .concept-feature p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+        }
+
+        /* 社会责任 */
+        .social-section {
+            background: white;
+        }
+
+        .social-content {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .social-card {
+            background: var(--bg-light);
+            padding: 35px 25px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .social-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .social-card i {
+            font-size: 45px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .social-card h3 {
+            font-size: 18px;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .social-card p {
+            font-size: 14px;
+            color: var(--text-gray);
+            line-height: 1.8;
+        }
+
+        /* 公告与新闻 */
+        .news-section {
+            background: var(--bg-light);
+        }
+
+        .news-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+        }
+
+        .news-tab {
+            padding: 12px 35px;
+            background: white;
+            border: 2px solid var(--bg-gray);
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: var(--text-gray);
+            font-size: 15px;
+        }
+
+        .news-tab:hover, .news-tab.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .news-list {
+            display: none;
+        }
+
+        .news-list.active {
+            display: block;
+        }
+
+        .news-item {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .news-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .news-date {
+            min-width: 90px;
+            text-align: center;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border-radius: 12px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: fit-content;
+        }
+
+        .news-date .day {
+            font-size: 32px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .news-date .month {
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .news-content {
+            flex: 1;
+        }
+
+        .news-content h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .news-content p {
+            color: var(--text-gray);
+            font-size: 15px;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        .news-tag {
+            display: inline-block;
+            padding: 5px 15px;
+            background: var(--bg-gray);
+            border-radius: 15px;
+            font-size: 12px;
+            color: var(--text-gray);
+            margin-bottom: 12px;
+        }
+
+        /* 页脚 */
+        .footer {
+            background: var(--text-dark);
+            color: white;
+            padding: 80px 20px 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('3.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            opacity: 0.5;
+            z-index: 0;
+        }
+
+        .footer-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-bottom {
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 50px;
+            margin-bottom: 50px;
+        }
+
+        .footer-section h3 {
+            font-size: 20px;
+            margin-bottom: 25px;
+            position: relative;
+            padding-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--primary-color);
+        }
+
+        .footer-section p {
+            color: #9ca3af;
+            line-height: 2;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        .footer-section i {
+            color: var(--primary-color);
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        .footer-cta {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .footer-cta h4 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .footer-cta-btn {
+            display: inline-block;
+            padding: 14px 35px;
+            background: white;
+            color: var(--primary-dark);
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .footer-cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer-bottom {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        /* 管理员相关样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-header h2 {
+            font-size: 24px;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-gray);
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: var(--text-dark);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--bg-gray);
+            border-radius: 10px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .error-msg {
+            color: #ef4444;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .error-msg.show {
+            display: block;
+        }
+
+        .admin-panel {
+            display: none;
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            z-index: 1500;
+            width: 380px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .admin-panel.active {
+            display: block;
+        }
+
+        .admin-panel h3 {
+            color: var(--text-dark);
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .admin-btn {
+            flex: 1;
+            padding: 10px;
+            background: var(--bg-gray);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        .admin-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .admin-btn.logout {
+            background: #ef4444;
+            color: white;
+        }
+
+        .admin-btn.logout:hover {
+            background: #dc2626;
+        }
+
+        .admin-news-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .admin-news-item {
+            padding: 12px;
+            border: 1px solid var(--bg-gray);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-news-item-info {
+            flex: 1;
+        }
+
+        .admin-news-item-info h4 {
+            font-size: 13px;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+
+        .admin-news-item-info span {
+            font-size: 11px;
+            color: var(--text-gray);
+        }
+
+        .admin-news-item-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .admin-news-item-actions button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.3s ease;
+        }
+
+        .edit-btn {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #d97706;
+        }
+
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+
+        .admin-login-link {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--text-dark);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 100;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .admin-login-link:hover {
+            background: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .business-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .honors-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .partners-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .about-section::before, .about-section::after,
+            .business-section::before, .business-section::after,
+            .features-section::before, .features-section::after,
+            .honors-section::before, .honors-section::after,
+            .partners-section::before, .partners-section::after {
+                display: none;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 80px;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 25px;
+                gap: 20px;
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .about-content {
+                grid-template-columns: 1fr;
+                gap: 50px;
+            }
+
+            .banner h1 {
+                font-size: 42px;
+            }
+
+            .banner p {
+                font-size: 18px;
+            }
+
+            .section {
+                padding: 80px 20px;
+            }
+
+            .business-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .features-container {
+                grid-template-columns: 1fr;
+            }
+
+            .honors-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .partners-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .concept-features {
+                grid-template-columns: 1fr;
+            }
+
+            .social-content {
+                grid-template-columns: 1fr;
+            }
+
+            .banner {
+                height: 600px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .banner h1 {
+                font-size: 32px;
+            }
+
+            .banner p {
+                font-size: 16px;
+            }
+
+            .section-title h2 {
+                font-size: 32px;
+            }
+
+            .business-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .honors-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .partners-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .banner-btn {
+                padding: 12px 30px;
+                font-size: 14px;
+                margin: 5px 0;
+            }
+
+            .banner {
+                height: 550px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .banner h1 {
+                font-size: 26px;
+            }
+
+            .banner p {
+                font-size: 14px;
+            }
+
+            .partners-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 平滑滚动 */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* 动画类 */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="pic\logo.png" alt="印象校联Logo">
+                <div class="logo-text">印象<span>校联</span></div>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home">首页</a></li>
+                <li><a href="#about">关于我们</a></li>
+                <li><a href="#business">业务领域</a></li>
+                <li><a href="#honors">荣誉资质</a></li>
+                <li><a href="#partners">合作案例</a></li>
+                <li><a href="#news-section">新闻动态</a></li>
+                <li><a href="#contact">联系我们</a></li>
+                <li><a href="#contact" class="consult-btn">合作咨询</a></li>
+            </ul>
+            <div class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Banner区 -->
+    <section class="banner" id="home">
+        <div class="banner-content">
+            <h1>始于1999 · 用心服务每一所校园</h1>
+            <p>中国高校后勤商业服务领先品牌 | 全国教育超市样板店</p>
+            <div style="margin-top: 30px;">
+                <a href="#about" class="banner-btn">了解我们</a>
+                <a href="#contact" class="banner-btn primary">合作加盟</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于我们 -->
+    <section class="section about-section" id="about">
+        <div class="section-title fade-in">
+            <h2>关于我们</h2>
+            <p>深耕高校后勤服务25年，打造校园生活服务标杆</p>
+        </div>
+        <div class="about-content">
+            <div class="about-text fade-in">
+                <h3>从1999年起步，专注校园服务25载</h3>
+                <p>杭州印象校联企业管理有限公司始于1999年的杭州劲力贸易公司，2010年正式更名为印象校联。公司现坐落于杭州钱塘区，注册资本2500万元，拥有200余人的专业服务团队。</p>
+                <p>25年来，我们始终深耕高校后勤服务领域，从单一的商品供给，逐步发展成为集教育超市连锁、美食餐饮管理、后勤商业体运营、产品配送与定制、智能零售服务于一体的综合性校园服务企业。</p>
+                <p>我们荣获"全国教育超市样板店""浙江省教育超市标准店"等多项荣誉，坚持用专业、用心的服务，为合作院校提供高品质的校园生活服务解决方案。</p>
+                <div class="about-highlight">
+                    <i class="fas fa-star"></i> 全国教育超市样板店获得者 | ISO9001/ISO14001/ISO22000认证企业
+                </div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card fade-in">
+                    <div class="stat-number" data-target="25">0</div>
+                    <div class="stat-label">年专注校园服务</div>
+                </div>
+                <div class="stat-card fade-in">
+                    <div class="stat-number" data-target="200">0</div>
+                    <div class="stat-label">专业服务团队</div>
+                </div>
+                <div class="stat-card fade-in">
+                    <div class="stat-number" data-target="100">0</div>
+                    <div class="stat-label">合作院校/单位</div>
+                </div>
+                <div class="stat-card fade-in">
+                    <div class="stat-number" data-target="6000">0</div>
+                    <div class="stat-label">在售商品种类</div>
+                </div>
+                <div class="stat-card fade-in">
+                    <div class="stat-number" data-target="80">0</div>
+                    <div class="stat-label">% 一线品牌占比</div>
+                </div>
+                <div class="stat-card fade-in">
+                    <div class="stat-number" data-target="5">0</div>
+                    <div class="stat-label">% 价格低于周边</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 核心业务 -->
+    <section class="section business-section" id="business">
+        <div class="section-title fade-in">
+            <h2>我们的服务</h2>
+            <p>商业服务 · 我们更懂校园</p>
+        </div>
+        <div class="business-grid">
+            <div class="business-card fade-in">
+                <div class="business-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <h3>教育超市连锁</h3>
+                <p>全国样板店、标准店运营经验，覆盖百余所高校，提供标准化、专业化的校园超市服务</p>
+            </div>
+            <div class="business-card fade-in">
+                <div class="business-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <h3>美食餐饮管理</h3>
+                <p>为学校、机关单位提供食堂及美食广场服务，打造安全、美味、健康的餐饮体验</p>
+            </div>
+            <div class="business-card fade-in">
+                <div class="business-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                <h3>后勤商业体运营</h3>
+                <p>整体规划校园商业街、生活区配套，提升校园商业服务品质和师生满意度</p>
+            </div>
+            <div class="business-card fade-in">
+                <div class="business-icon">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <h3>产品配送与定制</h3>
+                <p>包括莫干山天然山泉水等定制产品及专业物流配送服务，满足多样化需求</p>
+            </div>
+            <div class="business-card fade-in">
+                <div class="business-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3>智能零售服务</h3>
+                <p>自助收银、线上商城、校园30分钟达，打造数字化、智能化的购物体验</p>
+            </div>
+            <div class="business-card fade-in">
+                <div class="business-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <h3>校园文化共建</h3>
+                <p>勤工俭学岗位、活动赞助、文创开发，与学校共建有温度的校园文化</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 特色服务 -->
+    <section class="section features-section">
+        <div class="section-title fade-in">
+            <h2>特色服务</h2>
+            <p>用心服务，超越期待</p>
+        </div>
+        <div class="features-container">
+            <div class="feature-group">
+                <h3><i class="fas fa-tags"></i> 价格承诺</h3>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check-circle"></i> 低于周边商超5%以上</li>
+                    <li><i class="fas fa-check-circle"></i> 差价双倍返还保障</li>
+                    <li><i class="fas fa-check-circle"></i> 明码标价诚信经营</li>
+                </ul>
+            </div>
+            <div class="feature-group">
+                <h3><i class="fas fa-gift"></i> 免费服务</h3>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check-circle"></i> 爱心伞、充电服务</li>
+                    <li><i class="fas fa-check-circle"></i> 针线包、急救用品</li>
+                    <li><i class="fas fa-check-circle"></i> 中药冷藏、微波炉</li>
+                    <li><i class="fas fa-check-circle"></i> 失物招领、送货上门</li>
+                    <li><i class="fas fa-check-circle"></i> 平板车借用、篮球充气</li>
+                </ul>
+            </div>
+            <div class="feature-group">
+                <h3><i class="fas fa-headset"></i> 售后承诺</h3>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check-circle"></i> 24小时投诉响应</li>
+                    <li><i class="fas fa-check-circle"></i> 无条件退换货</li>
+                    <li><i class="fas fa-check-circle"></i> 首问负责制</li>
+                    <li><i class="fas fa-check-circle"></i> 专业客服团队支持</li>
+                </ul>
+            </div>
+            <div class="feature-group">
+                <h3><i class="fas fa-star"></i> 核心优势</h3>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check-circle"></i> 25年专业服务经验</li>
+                    <li><i class="fas fa-check-circle"></i> 200+专业服务团队</li>
+                    <li><i class="fas fa-check-circle"></i> 完善的质量管理体系</li>
+                    <li><i class="fas fa-check-circle"></i> 快速响应机制</li>
+                </ul>
+            </div>
+        </div>
+        <div class="highlight-box">
+            <h4><i class="fas fa-certificate"></i> 我们的承诺</h4>
+            <p>我们承诺所售商品价格低于周边商超5%以上，如发现高于周边，差价双倍返还。同时提供完善的免费服务和售后保障，让师生购物无忧。</p>
+        </div>
+    </section>
+
+    <!-- 荣誉资质 -->
+    <section class="section honors-section" id="honors">
+        <div class="section-title fade-in">
+            <h2>荣誉资质</h2>
+            <p>多项殊荣见证品质，树立行业标杆</p>
+        </div>
+        <div class="honors-grid">
+            <div class="honor-card fade-in">
+                <div class="honor-icon"><i class="fas fa-trophy"></i></div>
+                <h3>全国教育超市样板店</h3>
+            </div>
+            <div class="honor-card fade-in">
+                <div class="honor-icon"><i class="fas fa-medal"></i></div>
+                <h3>浙江省教育超市标准店（2016/2019/2022）</h3>
+            </div>
+            <div class="honor-card fade-in">
+                <div class="honor-icon"><i class="fas fa-award"></i></div>
+                <h3>浙江省3.15金承诺优秀单位</h3>
+            </div>
+            <div class="honor-card fade-in">
+                <div class="honor-icon"><i class="fas fa-star"></i></div>
+                <h3>浙江省连锁业创新示范企业</h3>
+            </div>
+            <div class="honor-card fade-in">
+                <div class="honor-icon"><i class="fas fa-thumbs-up"></i></div>
+                <h3>杭州市放心商店/食品安全示范店</h3>
+            </div>
+            <div class="honor-card fade-in">
+                <div class="honor-icon"><i class="fas fa-certificate"></i></div>
+                <h3>杭州电商促进会副会长单位</h3>
+            </div>
+            <div class="honor-card fade-in">
+                <div class="honor-icon"><i class="fas fa-check-circle"></i></div>
+                <h3>ISO9001/ISO14001/ISO45001/ISO22000</h3>
+            </div>
+            <div class="honor-card fade-in">
+                <div class="honor-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>五星售后服务/供应链安全认证</h3>
+            </div>
+        </div>
+    </section>
+
+    <!-- 合作案例 -->
+    <section class="section partners-section" id="partners">
+        <div class="section-title fade-in">
+            <h2>信任我们的伙伴</h2>
+            <p>部分合作院校与单位展示</p>
+        </div>
+        <div class="partners-grid">
+            <div class="partner-logo fade-in">
+                <i class="fas fa-university"></i>
+                <span>杭州电子科技大学</span>
+            </div>
+            <div class="partner-logo fade-in">
+                <i class="fas fa-university"></i>
+                <span>浙江理工大学</span>
+            </div>
+            <div class="partner-logo fade-in">
+                <i class="fas fa-university"></i>
+                <span>中国计量大学</span>
+            </div>
+            <div class="partner-logo fade-in">
+                <i class="fas fa-university"></i>
+                <span>浙江传媒学院</span>
+            </div>
+            <div class="partner-logo fade-in">
+                <i class="fas fa-university"></i>
+                <span>浙江财经大学</span>
+            </div>
+            <div class="partner-logo fade-in">
+                <i class="fas fa-university"></i>
+                <span>浙江树人学院</span>
+            </div>
+            <div class="partner-logo fade-in">
+                <i class="fas fa-university"></i>
+                <span>浙江工商大学</span>
+            </div>
+            <div class="partner-logo fade-in">
+                <i class="fas fa-university"></i>
+                <span>浙江金融职业学院</span>
+            </div>
+            <div class="partner-logo fade-in">
+                <i class="fas fa-university"></i>
+                <span>中南大学</span>
+            </div>
+            <div class="partner-logo fade-in">
+                <i class="fas fa-university"></i>
+                <span>安徽财经大学</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 现代理念 -->
+    <section class="section concept-section">
+        <div class="section-title fade-in">
+            <h2>现代型校园超市理念</h2>
+            <p>从"商品供给"升级为"价值共生"</p>
+        </div>
+        <div class="concept-content">
+            <div class="concept-title">杭电基因赋能 · 重构校园零售</div>
+            <p class="concept-text">结合杭州电子科技大学"笃学力行、守正求新"的校训，我们打造有理念、有温度的校园生活服务体。经营理念已从"商品供给"升级到"价值共生"，为师生提供更优质的服务体验。</p>
+            <div class="concept-features">
+                <div class="concept-feature fade-in">
+                    <i class="fas fa-flask"></i>
+                    <h4>专业学习支撑</h4>
+                    <p>为工科专业提供实验耗材、专业工具补给，助力学生科研学习</p>
+                </div>
+                <div class="concept-feature fade-in">
+                    <i class="fas fa-network-wired"></i>
+                    <h4>数字生态重构</h4>
+                    <p>线上+线下融合，小程序购物、自助收银、30分钟达</p>
+                </div>
+                <div class="concept-feature fade-in">
+                    <i class="fas fa-hand-holding-heart"></i>
+                    <h4>公益温度</h4>
+                    <p>平价助学、勤工俭学、公益活动，传递企业社会责任</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 社会责任 -->
+    <section class="section social-section">
+        <div class="section-title fade-in">
+            <h2>社会责任与育人实践</h2>
+            <p>不止于商业 · 共育未来</p>
+        </div>
+        <div class="social-content">
+            <div class="social-card fade-in">
+                <i class="fas fa-users"></i>
+                <h3>勤工俭学</h3>
+                <p>为在校学生提供大量勤工俭学岗位，帮助学生积累工作经验，缓解经济压力</p>
+            </div>
+            <div class="social-card fade-in">
+                <i class="fas fa-hand-holding-usd"></i>
+                <h3>教育捐赠</h3>
+                <p>捐赠教育发展基金，支持学校教学科研发展，助力教育事业进步</p>
+            </div>
+            <div class="social-card fade-in">
+                <i class="fas fa-calendar-alt"></i>
+                <h3>活动赞助</h3>
+                <p>积极赞助校园文化活动、体育赛事，丰富师生校园生活</p>
+            </div>
+            <div class="social-card fade-in">
+                <i class="fas fa-shopping-basket"></i>
+                <h3>扶贫专柜</h3>
+                <p>设立扶贫产品专柜，助力农产品销售，履行社会责任</p>
+            </div>
+            <div class="social-card fade-in">
+                <i class="fas fa-box-open"></i>
+                <h3>疫情期间保供</h3>
+                <p>疫情期间坚守岗位，保障校园物资供应，守护师生健康安全</p>
+            </div>
+            <div class="social-card fade-in">
+                <i class="fas fa-lightbulb"></i>
+                <h3>文创开发</h3>
+                <p>开发校园文创产品，传播校园文化，增强师生归属感</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 公告与新闻 -->
+    <section class="section news-section" id="news-section">
+        <div class="section-title fade-in">
+            <h2>公告与新闻</h2>
+            <p>了解最新企业动态和重要公告信息</p>
+        </div>
+        <div class="news-tabs fade-in">
+            <div class="news-tab active" data-tab="announcements">企业公告</div>
+            <div class="news-tab" data-tab="news">动态新闻</div>
+        </div>
+        <div id="announcements" class="news-list active">
+            <!-- 公告内容将通过JS动态加载 -->
+        </div>
+        <div id="news" class="news-list">
+            <!-- 新闻内容将通过JS动态加载 -->
+        </div>
+    </section>
+
+    <!-- 管理员登录模态框 -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>管理员登录</h2>
+                <button class="close-btn" onclick="closeModal('loginModal')">&times;</button>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="username" placeholder="请输入用户名" required>
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="password" placeholder="请输入密码" required>
+                </div>
+                <p class="error-msg" id="loginError"></p>
+                <button type="submit" class="submit-btn">登录</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 添加/编辑内容模态框 -->
+    <div class="modal" id="contentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="contentModalTitle">添加内容</h2>
+                <button class="close-btn" onclick="closeModal('contentModal')">&times;</button>
+            </div>
+            <form id="contentForm">
+                <input type="hidden" id="contentId">
+                <input type="hidden" id="contentType">
+                <div class="form-group">
+                    <label>标题</label>
+                    <input type="text" id="contentTitle" placeholder="请输入标题" required>
+                </div>
+                <div class="form-group">
+                    <label>内容</label>
+                    <textarea id="contentBody" placeholder="请输入内容" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>标签</label>
+                    <input type="text" id="contentTag" placeholder="请输入标签（如：重要、通知）">
+                </div>
+                <div class="form-group">
+                    <label>图片</label>
+                    <input type="file" id="contentImage" accept="image/*" onchange="previewImage(this)">
+                    <div id="imagePreview" style="margin-top: 10px; display: none;">
+                        <img id="previewImg" src="" alt="预览" style="max-width: 100%; max-height: 200px; border-radius: 10px;">
+                        <button type="button" onclick="removeImage()" style="margin-top: 10px; padding: 5px 10px; background: #ef4444; color: white; border: none; border-radius: 5px; cursor: pointer;">删除图片</button>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn">保存</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 管理员面板 -->
+    <div class="admin-panel" id="adminPanel">
+        <h3>管理员面板</h3>
+        <div class="admin-actions">
+            <button class="admin-btn" onclick="showAddModal('announcements')">添加公告</button>
+            <button class="admin-btn" onclick="showAddModal('news')">添加新闻</button>
+        </div>
+        <h4>公告列表</h4>
+        <div class="admin-news-list" id="adminAnnouncementsList"></div>
+        <h4 style="margin-top: 20px;">新闻列表</h4>
+        <div class="admin-news-list" id="adminNewsList"></div>
+        <div class="admin-actions" style="margin-top: 20px;">
+            <button class="admin-btn logout" onclick="logout()">退出登录</button>
+        </div>
+    </div>
+
+    <!-- 管理员登录入口 -->
+    <div class="admin-login-link" id="adminLoginLink" onclick="openLoginModal()">
+        <i class="fas fa-user-shield"></i> 管理员
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer" id="contact">
+        <div class="footer-content">
+            <div class="footer-section">
+                <div class="logo" style="margin-bottom: 20px;">
+                    <img src="pic\logo.png" alt="印象校联Logo" style="height: 50px;">
+                    <div class="logo-text" style="color: white;">印象<span style="color: var(--primary-color);">校联</span></div>
+                </div>
+                <p>始于1999 · 用心服务每一所校园</p>
+                <p><i class="fas fa-map-marker-alt"></i>杭州市钱塘区学林街1298号</p>
+                <p><i class="fas fa-phone"></i>联系电话：13805748753</p>
+                <p><i class="fas fa-envelope"></i>邮箱：hzyxxl8753@163.com</p>
+            </div>
+            <div class="footer-section">
+                <h3>快速导航</h3>
+                <p><a href="#about" style="color:#9ca3af;text-decoration:none;">关于我们</a></p>
+                <p><a href="#business" style="color:#9ca3af;text-decoration:none;">业务领域</a></p>
+                <p><a href="#honors" style="color:#9ca3af;text-decoration:none;">荣誉资质</a></p>
+                <p><a href="#partners" style="color:#9ca3af;text-decoration:none;">合作案例</a></p>
+                <p><a href="#news-section" style="color:#9ca3af;text-decoration:none;">新闻动态</a></p>
+            </div>
+            <div class="footer-section">
+                <h3>合作咨询</h3>
+                <p>欢迎各高校、机关单位洽谈合作，我们将为您提供专业的校园服务解决方案。</p>
+                <div class="footer-cta">
+                    <h4><i class="fas fa-handshake"></i> 成为我们的伙伴</h4>
+                    <a href="#" class="footer-cta-btn">立即联系</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 杭州印象校联企业管理有限公司 版权所有 | 浙ICP备XXXXXXXX号</p>
+        </div>
+    </footer>
+
+    <script>
+        // 初始化数据 - 从localStorage加载或使用默认数据
+        const defaultAnnouncements = [
+            {
+                id: 1,
+                title: '印象校联荣获2025年度优秀校园服务商',
+                content: '感谢各高校的信任与支持，印象校联凭借优质的服务质量和管理水平，荣获2025年度优秀校园服务商称号。',
+                date: '2026-03-01',
+                tag: '重要'
+            },
+            {
+                id: 2,
+                title: '新学期开学温馨提示',
+                content: '新学期开始，各校区超市已全面做好准备工作，欢迎同学们前来选购。我们将继续提供优质、便捷的服务。',
+                date: '2026-02-20',
+                tag: '通知'
+            },
+            {
+                id: 3,
+                title: '关于部分商品价格调整的公告',
+                content: '为更好地服务广大师生，我们对部分商品价格进行了调整，确保商品价格低于周边商超5%以上。',
+                date: '2026-02-15',
+                tag: '通知'
+            }
+        ];
+
+        const defaultNewsData = [
+            {
+                id: 1,
+                title: '印象校联参加浙江省高校后勤服务论坛',
+                content: '公司代表参加了在杭州举办的浙江省高校后勤服务论坛，与各高校代表深入交流校园服务经验。',
+                date: '2026-02-28',
+                tag: '活动'
+            },
+            {
+                id: 2,
+                title: '中国计量大学新校区超市盛大开业',
+                content: '印象校联在中国计量大学新校区的超市正式开业，提供智能化购物体验，受到师生一致好评。',
+                date: '2026-02-25',
+                tag: '开业'
+            },
+            {
+                id: 3,
+                title: '印象校联与浙江工商大学达成深度合作',
+                content: '双方签署战略合作协议，印象校联将为浙江工商大学提供更全面的校园服务解决方案。',
+                date: '2026-02-20',
+                tag: '合作'
+            },
+            {
+                id: 4,
+                title: '印象校联数字化系统全面升级',
+                content: '为进一步提升服务质量，公司对线上小程序、自助收银等数字化系统进行了全面升级。',
+                date: '2026-02-15',
+                tag: '技术'
+            }
+        ];
+
+        let announcements = JSON.parse(localStorage.getItem('yxxl_announcements')) || defaultAnnouncements;
+        let newsData = JSON.parse(localStorage.getItem('yxxl_newsData')) || defaultNewsData;
+        let isLoggedIn = false;
+        let editingItem = null;
+
+        // 保存数据到localStorage
+        function saveData() {
+            localStorage.setItem('yxxl_announcements', JSON.stringify(announcements));
+            localStorage.setItem('yxxl_newsData', JSON.stringify(newsData));
+        }
+
+        // 渲染公告和新闻
+        function renderAnnouncements() {
+            const container = document.getElementById('announcements');
+            container.innerHTML = announcements.map(item => `
+                <div class="news-item fade-in">
+                    <div class="news-date">
+                        <div class="day">${item.date.split('-')[2]}</div>
+                        <div class="month">${item.date.split('-')[1]}月</div>
+                    </div>
+                    <div class="news-content">
+                        <span class="news-tag">${item.tag}</span>
+                        <h3>${item.title}</h3>
+                        ${item.image ? `<img src="${item.image}" alt="${item.title}" style="max-width: 100%; max-height: 300px; border-radius: 10px; margin-bottom: 15px;">` : ''}
+                        <p>${item.content}</p>
+                    </div>
+                </div>
+            `).join('');
+            observeNewElements();
+        }
+
+        function renderNews() {
+            const container = document.getElementById('news');
+            container.innerHTML = newsData.map(item => `
+                <div class="news-item fade-in">
+                    <div class="news-date">
+                        <div class="day">${item.date.split('-')[2]}</div>
+                        <div class="month">${item.date.split('-')[1]}月</div>
+                    </div>
+                    <div class="news-content">
+                        <span class="news-tag">${item.tag}</span>
+                        <h3>${item.title}</h3>
+                        ${item.image ? `<img src="${item.image}" alt="${item.title}" style="max-width: 100%; max-height: 300px; border-radius: 10px; margin-bottom: 15px;">` : ''}
+                        <p>${item.content}</p>
+                    </div>
+                </div>
+            `).join('');
+            observeNewElements();
+        }
+
+        function renderAdminPanel() {
+            const announcementsList = document.getElementById('adminAnnouncementsList');
+            const newsList = document.getElementById('adminNewsList');
+
+            announcementsList.innerHTML = announcements.map(item => `
+                <div class="admin-news-item">
+                    <div class="admin-news-item-info">
+                        <h4>${item.title}</h4>
+                        <span>${item.date} | ${item.tag}</span>
+                    </div>
+                    <div class="admin-news-item-actions">
+                        <button class="edit-btn" onclick="editContent('announcements', ${item.id})">编辑</button>
+                        <button class="delete-btn" onclick="deleteContent('announcements', ${item.id})">删除</button>
+                    </div>
+                </div>
+            `).join('');
+
+            newsList.innerHTML = newsData.map(item => `
+                <div class="admin-news-item">
+                    <div class="admin-news-item-info">
+                        <h4>${item.title}</h4>
+                        <span>${item.date} | ${item.tag}</span>
+                    </div>
+                    <div class="admin-news-item-actions">
+                        <button class="edit-btn" onclick="editContent('news', ${item.id})">编辑</button>
+                        <button class="delete-btn" onclick="deleteContent('news', ${item.id})">删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function observeNewElements() {
+            const newElements = document.querySelectorAll('.news-item.fade-in:not(.visible)');
+            newElements.forEach(el => observer.observe(el));
+        }
+
+        // 标签切换
+        document.querySelectorAll('.news-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.news-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                const targetId = this.dataset.tab;
+                document.querySelectorAll('.news-list').forEach(list => list.classList.remove('active'));
+                document.getElementById(targetId).classList.add('active');
+            });
+        });
+
+        // 模态框操作
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // 登录处理
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === 'yxxl' && password === '8753') {
+                isLoggedIn = true;
+                closeModal('loginModal');
+                document.getElementById('adminPanel').classList.add('active');
+                document.getElementById('adminLoginLink').innerHTML = '<i class="fas fa-user-check"></i> 已登录';
+                document.getElementById('adminLoginLink').style.background = '#10b981';
+                renderAdminPanel();
+                document.getElementById('loginForm').reset();
+                document.getElementById('loginError').classList.remove('show');
+            } else {
+                document.getElementById('loginError').textContent = '用户名或密码错误';
+                document.getElementById('loginError').classList.add('show');
+            }
+        });
+
+        // 退出登录
+        function logout() {
+            isLoggedIn = false;
+            document.getElementById('adminPanel').classList.remove('active');
+            document.getElementById('adminLoginLink').innerHTML = '<i class="fas fa-user-shield"></i> 管理员';
+            document.getElementById('adminLoginLink').style.background = '#0A2C4D';
+        }
+
+        // 添加内容
+        function showAddModal(type) {
+            editingItem = null;
+            document.getElementById('contentModalTitle').textContent = '添加' + (type === 'announcements' ? '公告' : '新闻');
+            document.getElementById('contentType').value = type;
+            document.getElementById('contentId').value = '';
+            document.getElementById('contentTitle').value = '';
+            document.getElementById('contentBody').value = '';
+            document.getElementById('contentTag').value = '';
+            removeImage();
+            document.getElementById('contentModal').classList.add('active');
+        }
+
+        // 编辑内容
+        function editContent(type, id) {
+            const data = type === 'announcements' ? announcements : newsData;
+            const item = data.find(d => d.id === id);
+            if (item) {
+                editingItem = { type, id };
+                document.getElementById('contentModalTitle').textContent = '编辑' + (type === 'announcements' ? '公告' : '新闻');
+                document.getElementById('contentType').value = type;
+                document.getElementById('contentId').value = id;
+                document.getElementById('contentTitle').value = item.title;
+                document.getElementById('contentBody').value = item.content;
+                document.getElementById('contentTag').value = item.tag;
+                if (item.image) {
+                    document.getElementById('previewImg').src = item.image;
+                    document.getElementById('imagePreview').style.display = 'block';
+                    currentImageBase64 = item.image;
+                } else {
+                    removeImage();
+                }
+                document.getElementById('contentModal').classList.add('active');
+            }
+        }
+
+        // 删除内容
+        function deleteContent(type, id) {
+            if (confirm('确定要删除这条内容吗？')) {
+                if (type === 'announcements') {
+                    announcements = announcements.filter(a => a.id !== id);
+                    renderAnnouncements();
+                } else {
+                    newsData = newsData.filter(n => n.id !== id);
+                    renderNews();
+                }
+                saveData();
+                renderAdminPanel();
+            }
+        }
+
+        // 图片预览
+        let currentImageBase64 = null;
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'block';
+                    currentImageBase64 = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function removeImage() {
+            document.getElementById('contentImage').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('previewImg').src = '';
+            currentImageBase64 = null;
+        }
+
+        // 保存内容
+        document.getElementById('contentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const type = document.getElementById('contentType').value;
+            const id = document.getElementById('contentId').value;
+            const title = document.getElementById('contentTitle').value;
+            const content = document.getElementById('contentBody').value;
+            const tag = document.getElementById('contentTag').value || '通用';
+            const image = currentImageBase64 || '';
+
+            const newData = {
+                id: id ? parseInt(id) : Date.now(),
+                title,
+                content,
+                date: new Date().toISOString().split('T')[0],
+                tag,
+                image
+            };
+
+            if (type === 'announcements') {
+                if (id) {
+                    const index = announcements.findIndex(a => a.id === parseInt(id));
+                    if (index !== -1) {
+                        announcements[index] = { ...announcements[index], ...newData };
+                    }
+                } else {
+                    announcements.unshift(newData);
+                }
+                renderAnnouncements();
+            } else {
+                if (id) {
+                    const index = newsData.findIndex(n => n.id === parseInt(id));
+                    if (index !== -1) {
+                        newsData[index] = { ...newsData[index], ...newData };
+                    }
+                } else {
+                    newsData.unshift(newData);
+                }
+                renderNews();
+            }
+
+            saveData();
+            renderAdminPanel();
+            closeModal('contentModal');
+            document.getElementById('contentForm').reset();
+            removeImage();
+        });
+
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // 移动端菜单切换
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+
+        mobileMenuBtn.addEventListener('click', function() {
+            navLinks.classList.toggle('active');
+            const icon = mobileMenuBtn.querySelector('i');
+            if (navLinks.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+
+        // 点击导航链接后关闭移动端菜单
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', function() {
+                navLinks.classList.remove('active');
+                const icon = mobileMenuBtn.querySelector('i');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            });
+        });
+
+        // 滚动动画观察器
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // 数字动画效果
+        function animateNumbers() {
+            const statNumbers = document.querySelectorAll('.stat-number');
+            statNumbers.forEach(stat => {
+                const target = parseInt(stat.dataset.target);
+                let current = 0;
+                const increment = target / 50;
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        stat.textContent = target;
+                        clearInterval(timer);
+                    } else {
+                        stat.textContent = Math.floor(current);
+                    }
+                }, 30);
+            });
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('load', function() {
+            renderAnnouncements();
+            renderNews();
+            animateNumbers();
+        });
+
+        // 平滑滚动到锚点
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offsetTop = target.offsetTop - 80;
+                    window.scrollTo({
+                        top: offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
