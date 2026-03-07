@@ -2201,7 +2201,7 @@
             const state = Math.random().toString(36).substring(2);
             sessionStorage.setItem('oauth_state', state);
             const redirectUri = window.location.origin + window.location.pathname;
-            const url = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=repo&state=${state}`;
+            const url = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`;
             window.location.href = url;
         }
 
