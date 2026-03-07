@@ -1298,6 +1298,125 @@
             transform: translateY(-3px);
         }
 
+        /* GitHub 登录按钮 */
+        .github-login-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 14px 24px;
+            background: #24292e;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .github-login-btn:hover {
+            background: #1a1e22;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        .github-login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .github-login-btn i {
+            font-size: 22px;
+        }
+        .login-hint {
+            text-align: center;
+            color: #6b7280;
+            font-size: 13px;
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+
+        /* GitHub 用户信息 */
+        .github-user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .github-user-info img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+        .github-user-info span {
+            font-size: 14px;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        /* Toast 通知 */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .toast-message {
+            padding: 12px 24px;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+            pointer-events: auto;
+        }
+        .toast-message.success { background: #10b981; }
+        .toast-message.error { background: #ef4444; }
+        .toast-message.info { background: #3b82f6; }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes toastOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* 加载状态 */
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            right: 12px;
+            margin-top: -8px;
+            border: 2px solid transparent;
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .submit-btn:disabled, .admin-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         /* 响应式设计 */
         @media (max-width: 1200px) {
             .business-grid {
@@ -1830,18 +1949,13 @@
                 <h2>管理员登录</h2>
                 <button class="close-btn" onclick="closeModal('loginModal')">&times;</button>
             </div>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label>用户名</label>
-                    <input type="text" id="username" placeholder="请输入用户名" required>
-                </div>
-                <div class="form-group">
-                    <label>密码</label>
-                    <input type="password" id="password" placeholder="请输入密码" required>
-                </div>
+            <div style="padding: 20px 0;">
+                <button class="github-login-btn" id="githubLoginBtn" onclick="startGitHubLogin()">
+                    <i class="fab fa-github"></i> 使用 GitHub 登录
+                </button>
+                <p class="login-hint">使用 GitHub 账号登录，需要对仓库有写入权限。</p>
                 <p class="error-msg" id="loginError"></p>
-                <button type="submit" class="submit-btn">登录</button>
-            </form>
+            </div>
         </div>
     </div>
 
@@ -1883,6 +1997,7 @@
     <!-- 管理员面板 -->
     <div class="admin-panel" id="adminPanel">
         <h3>管理员面板</h3>
+        <div class="github-user-info" id="githubUserInfo" style="display:none;"></div>
         <div class="admin-actions">
             <button class="admin-btn" onclick="showAddModal('announcements')">添加公告</button>
             <button class="admin-btn" onclick="showAddModal('news')">添加新闻</button>
@@ -1892,7 +2007,7 @@
         <h4 style="margin-top: 20px;">新闻列表</h4>
         <div class="admin-news-list" id="adminNewsList"></div>
         <div class="admin-actions" style="margin-top: 20px;">
-            <button class="admin-btn logout" onclick="logout()">退出登录</button>
+            <button class="admin-btn logout" onclick="logout()">退出 GitHub 登录</button>
         </div>
     </div>
 
@@ -1900,6 +2015,9 @@
     <div class="admin-login-link" id="adminLoginLink" onclick="openLoginModal()">
         <i class="fas fa-user-shield"></i> 管理员
     </div>
+
+    <!-- Toast 通知容器 -->
+    <div class="toast-container" id="toastContainer"></div>
 
     <!-- 页脚 -->
     <footer class="footer" id="contact">
@@ -1932,79 +2050,269 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2025 杭州印象校联企业管理有限公司 版权所有 | 浙ICP备XXXXXXXX号</p>
+            <p>&copy; 2025 杭州印象校联企业管理有限公司 版权所有 | <a href="https://beian.miit.gov.cn/" target="_blank" style="color:#fff;text-decoration:none;">浙ICP备2026010810号-1</a></p>
         </div>
     </footer>
 
     <script>
-        // 初始化数据 - 从localStorage加载或使用默认数据
+        // ========== 配置 ==========
+        // TODO: 部署前请填入你的 GitHub OAuth App 的 Client ID 和 Cloudflare Worker URL
+        const GITHUB_OWNER = 'fjh1997';
+        const GITHUB_REPO = 'web';
+        const GITHUB_BRANCH = 'main';
+        const OAUTH_WORKER_URL = 'https://github-oauth-proxy.fjh1997.workers.dev';
+        const GITHUB_CLIENT_ID = 'Iv23livknmABGwCaBIk7';
+        const RAW_BASE = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}`;
+        const API_BASE = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`;
+
+        // ========== 默认数据（fallback） ==========
         const defaultAnnouncements = [
-            {
-                id: 1,
-                title: '印象校联荣获2025年度优秀校园服务商',
-                content: '感谢各高校的信任与支持，印象校联凭借优质的服务质量和管理水平，荣获2025年度优秀校园服务商称号。',
-                date: '2026-03-01',
-                tag: '重要'
-            },
-            {
-                id: 2,
-                title: '新学期开学温馨提示',
-                content: '新学期开始，各校区超市已全面做好准备工作，欢迎同学们前来选购。我们将继续提供优质、便捷的服务。',
-                date: '2026-02-20',
-                tag: '通知'
-            },
-            {
-                id: 3,
-                title: '关于部分商品价格调整的公告',
-                content: '为更好地服务广大师生，我们对部分商品价格进行了调整，确保商品价格低于周边商超5%以上。',
-                date: '2026-02-15',
-                tag: '通知'
-            }
+            { id: 1, title: '印象校联荣获2025年度优秀校园服务商', content: '感谢各高校的信任与支持，印象校联凭借优质的服务质量和管理水平，荣获2025年度优秀校园服务商称号。', date: '2026-03-01', tag: '重要' },
+            { id: 2, title: '新学期开学温馨提示', content: '新学期开始，各校区超市已全面做好准备工作，欢迎同学们前来选购。我们将继续提供优质、便捷的服务。', date: '2026-02-20', tag: '通知' },
+            { id: 3, title: '关于部分商品价格调整的公告', content: '为更好地服务广大师生，我们对部分商品价格进行了调整，确保商品价格低于周边商超5%以上。', date: '2026-02-15', tag: '通知' }
         ];
-
         const defaultNewsData = [
-            {
-                id: 1,
-                title: '印象校联参加浙江省高校后勤服务论坛',
-                content: '公司代表参加了在杭州举办的浙江省高校后勤服务论坛，与各高校代表深入交流校园服务经验。',
-                date: '2026-02-28',
-                tag: '活动'
-            },
-            {
-                id: 2,
-                title: '中国计量大学新校区超市盛大开业',
-                content: '印象校联在中国计量大学新校区的超市正式开业，提供智能化购物体验，受到师生一致好评。',
-                date: '2026-02-25',
-                tag: '开业'
-            },
-            {
-                id: 3,
-                title: '印象校联与浙江工商大学达成深度合作',
-                content: '双方签署战略合作协议，印象校联将为浙江工商大学提供更全面的校园服务解决方案。',
-                date: '2026-02-20',
-                tag: '合作'
-            },
-            {
-                id: 4,
-                title: '印象校联数字化系统全面升级',
-                content: '为进一步提升服务质量，公司对线上小程序、自助收银等数字化系统进行了全面升级。',
-                date: '2026-02-15',
-                tag: '技术'
-            }
+            { id: 1, title: '印象校联参加浙江省高校后勤服务论坛', content: '公司代表参加了在杭州举办的浙江省高校后勤服务论坛，与各高校代表深入交流校园服务经验。', date: '2026-02-28', tag: '活动' },
+            { id: 2, title: '中国计量大学新校区超市盛大开业', content: '印象校联在中国计量大学新校区的超市正式开业，提供智能化购物体验，受到师生一致好评。', date: '2026-02-25', tag: '开业' },
+            { id: 3, title: '印象校联与浙江工商大学达成深度合作', content: '双方签署战略合作协议，印象校联将为浙江工商大学提供更全面的校园服务解决方案。', date: '2026-02-20', tag: '合作' },
+            { id: 4, title: '印象校联数字化系统全面升级', content: '为进一步提升服务质量，公司对线上小程序、自助收银等数字化系统进行了全面升级。', date: '2026-02-15', tag: '技术' }
         ];
 
-        let announcements = JSON.parse(localStorage.getItem('yxxl_announcements')) || defaultAnnouncements;
-        let newsData = JSON.parse(localStorage.getItem('yxxl_newsData')) || defaultNewsData;
+        // ========== 状态变量 ==========
+        let announcements = [...defaultAnnouncements];
+        let newsData = [...defaultNewsData];
         let isLoggedIn = false;
         let editingItem = null;
+        let currentImageBase64 = null;
+        let currentImageFile = null;
+        let githubToken = null;
+        let githubUser = null;
+        let isSaving = false;
 
-        // 保存数据到localStorage
-        function saveData() {
-            localStorage.setItem('yxxl_announcements', JSON.stringify(announcements));
-            localStorage.setItem('yxxl_newsData', JSON.stringify(newsData));
+        // ========== Toast 通知 ==========
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast-message ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         }
 
-        // 渲染公告和新闻
+        // ========== GitHub API 工具函数 ==========
+        async function githubApiFetch(url, options = {}) {
+            const headers = { 'Accept': 'application/vnd.github.v3+json', ...options.headers };
+            if (githubToken) headers['Authorization'] = `Bearer ${githubToken}`;
+            return fetch(url, { ...options, headers });
+        }
+
+        async function getFileSha(path) {
+            try {
+                const resp = await githubApiFetch(`${API_BASE}/contents/${path}?ref=${GITHUB_BRANCH}`);
+                if (resp.ok) { const data = await resp.json(); return data.sha; }
+                return null;
+            } catch { return null; }
+        }
+
+        async function readJsonFromGitHub(path) {
+            try {
+                const resp = await fetch(`${RAW_BASE}/${path}?t=${Date.now()}`);
+                if (resp.ok) return await resp.json();
+                return null;
+            } catch { return null; }
+        }
+
+        function utf8ToBase64(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+
+        async function writeJsonToGitHub(path, data, commitMessage) {
+            const content = utf8ToBase64(JSON.stringify(data, null, 2));
+            const sha = await getFileSha(path);
+            const body = { message: commitMessage, content, branch: GITHUB_BRANCH };
+            if (sha) body.sha = sha;
+            try {
+                const resp = await githubApiFetch(`${API_BASE}/contents/${path}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (resp.ok) return true;
+                if (resp.status === 409) {
+                    // SHA 冲突，重试一次
+                    const newSha = await getFileSha(path);
+                    body.sha = newSha;
+                    const retry = await githubApiFetch(`${API_BASE}/contents/${path}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    return retry.ok;
+                }
+                return false;
+            } catch { return false; }
+        }
+
+        async function uploadImageToGitHub(file) {
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('图片大小不能超过 5MB', 'error');
+                return null;
+            }
+            const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+            const filePath = `data/images/${Date.now()}_${safeName}`;
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    const base64 = e.target.result.split(',')[1];
+                    try {
+                        const resp = await githubApiFetch(`${API_BASE}/contents/${filePath}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                message: `Upload image: ${file.name}`,
+                                content: base64,
+                                branch: GITHUB_BRANCH
+                            })
+                        });
+                        if (resp.ok) {
+                            resolve(`${RAW_BASE}/${filePath}`);
+                        } else {
+                            resolve(null);
+                        }
+                    } catch { resolve(null); }
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function checkRepoPushAccess() {
+            try {
+                const resp = await githubApiFetch(API_BASE);
+                if (resp.ok) {
+                    const data = await resp.json();
+                    return data.permissions && data.permissions.push === true;
+                }
+                return false;
+            } catch { return false; }
+        }
+
+        // ========== OAuth 流程 ==========
+        function startGitHubLogin() {
+            const state = Math.random().toString(36).substring(2);
+            sessionStorage.setItem('oauth_state', state);
+            const redirectUri = window.location.origin + window.location.pathname;
+            const url = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=repo&state=${state}`;
+            window.location.href = url;
+        }
+
+        async function handleOAuthCallback() {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+            const state = params.get('state');
+            if (!code || !state) return;
+
+            const savedState = sessionStorage.getItem('oauth_state');
+            if (state !== savedState) {
+                showToast('登录验证失败，请重试', 'error');
+                history.replaceState({}, '', window.location.pathname);
+                return;
+            }
+            sessionStorage.removeItem('oauth_state');
+            history.replaceState({}, '', window.location.pathname);
+
+            const btn = document.getElementById('githubLoginBtn');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fab fa-github"></i> 登录中...'; }
+            document.getElementById('loginModal').classList.add('active');
+
+            try {
+                const resp = await fetch(`${OAUTH_WORKER_URL}/api/oauth/token`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+                const data = await resp.json();
+                if (data.access_token) {
+                    sessionStorage.setItem('github_token', data.access_token);
+                    await completeLogin(data.access_token);
+                } else {
+                    showToast('登录失败: ' + (data.error_description || '未知错误'), 'error');
+                }
+            } catch (err) {
+                showToast('登录失败，无法连接认证服务', 'error');
+            }
+
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fab fa-github"></i> 使用 GitHub 登录'; }
+        }
+
+        async function completeLogin(token) {
+            githubToken = token;
+
+            const hasPush = await checkRepoPushAccess();
+            if (!hasPush) {
+                showToast('您没有该仓库的写入权限', 'error');
+                githubToken = null;
+                sessionStorage.removeItem('github_token');
+                return;
+            }
+
+            try {
+                const resp = await githubApiFetch('https://api.github.com/user');
+                if (resp.ok) githubUser = await resp.json();
+            } catch {}
+
+            isLoggedIn = true;
+            closeModal('loginModal');
+            document.getElementById('adminPanel').classList.add('active');
+            document.getElementById('adminLoginLink').innerHTML = '<i class="fas fa-user-check"></i> 已登录';
+            document.getElementById('adminLoginLink').style.background = '#10b981';
+
+            if (githubUser) {
+                const info = document.getElementById('githubUserInfo');
+                info.innerHTML = `<img src="${githubUser.avatar_url}" alt="avatar"><span>${githubUser.login}</span>`;
+                info.style.display = 'flex';
+            }
+
+            renderAdminPanel();
+            showToast('登录成功', 'success');
+        }
+
+        function restoreSession() {
+            const token = sessionStorage.getItem('github_token');
+            if (token) completeLogin(token);
+        }
+
+        // ========== 数据加载/保存 ==========
+        async function loadData() {
+            const [annData, newsJsonData] = await Promise.all([
+                readJsonFromGitHub('data/announcements.json'),
+                readJsonFromGitHub('data/news.json')
+            ]);
+            if (annData && Array.isArray(annData)) announcements = annData;
+            if (newsJsonData && Array.isArray(newsJsonData)) newsData = newsJsonData;
+            renderAnnouncements();
+            renderNews();
+        }
+
+        async function saveData() {
+            if (isSaving) return;
+            isSaving = true;
+            try {
+                const [r1, r2] = await Promise.all([
+                    writeJsonToGitHub('data/announcements.json', announcements, '更新公告'),
+                    writeJsonToGitHub('data/news.json', newsData, '更新新闻')
+                ]);
+                if (r1 && r2) {
+                    showToast('保存成功', 'success');
+                } else {
+                    showToast('保存失败，请检查网络后重试', 'error');
+                }
+            } catch {
+                showToast('保存失败', 'error');
+            }
+            isSaving = false;
+        }
+
+        // ========== 渲染函数 ==========
         function renderAnnouncements() {
             const container = document.getElementById('announcements');
             container.innerHTML = announcements.map(item => `
@@ -2046,7 +2354,6 @@
         function renderAdminPanel() {
             const announcementsList = document.getElementById('adminAnnouncementsList');
             const newsList = document.getElementById('adminNewsList');
-
             announcementsList.innerHTML = announcements.map(item => `
                 <div class="admin-news-item">
                     <div class="admin-news-item-info">
@@ -2059,7 +2366,6 @@
                     </div>
                 </div>
             `).join('');
-
             newsList.innerHTML = newsData.map(item => `
                 <div class="admin-news-item">
                     <div class="admin-news-item-info">
@@ -2079,57 +2385,44 @@
             newElements.forEach(el => observer.observe(el));
         }
 
-        // 标签切换
+        // ========== 标签切换 ==========
         document.querySelectorAll('.news-tab').forEach(tab => {
             tab.addEventListener('click', function() {
                 document.querySelectorAll('.news-tab').forEach(t => t.classList.remove('active'));
                 this.classList.add('active');
-
                 const targetId = this.dataset.tab;
                 document.querySelectorAll('.news-list').forEach(list => list.classList.remove('active'));
                 document.getElementById(targetId).classList.add('active');
             });
         });
 
-        // 模态框操作
+        // ========== 模态框操作 ==========
         function openLoginModal() {
-            document.getElementById('loginModal').classList.add('active');
+            if (isLoggedIn) {
+                document.getElementById('adminPanel').classList.toggle('active');
+            } else {
+                document.getElementById('loginModal').classList.add('active');
+            }
         }
 
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
         }
 
-        // 登录处理
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            if (username === 'yxxl' && password === '8753') {
-                isLoggedIn = true;
-                closeModal('loginModal');
-                document.getElementById('adminPanel').classList.add('active');
-                document.getElementById('adminLoginLink').innerHTML = '<i class="fas fa-user-check"></i> 已登录';
-                document.getElementById('adminLoginLink').style.background = '#10b981';
-                renderAdminPanel();
-                document.getElementById('loginForm').reset();
-                document.getElementById('loginError').classList.remove('show');
-            } else {
-                document.getElementById('loginError').textContent = '用户名或密码错误';
-                document.getElementById('loginError').classList.add('show');
-            }
-        });
-
-        // 退出登录
+        // ========== 退出登录 ==========
         function logout() {
             isLoggedIn = false;
+            githubToken = null;
+            githubUser = null;
+            sessionStorage.removeItem('github_token');
             document.getElementById('adminPanel').classList.remove('active');
             document.getElementById('adminLoginLink').innerHTML = '<i class="fas fa-user-shield"></i> 管理员';
             document.getElementById('adminLoginLink').style.background = '#0A2C4D';
+            document.getElementById('githubUserInfo').style.display = 'none';
+            showToast('已退出登录', 'info');
         }
 
-        // 添加内容
+        // ========== 添加/编辑/删除内容 ==========
         function showAddModal(type) {
             editingItem = null;
             document.getElementById('contentModalTitle').textContent = '添加' + (type === 'announcements' ? '公告' : '新闻');
@@ -2142,7 +2435,6 @@
             document.getElementById('contentModal').classList.add('active');
         }
 
-        // 编辑内容
         function editContent(type, id) {
             const data = type === 'announcements' ? announcements : newsData;
             const item = data.find(d => d.id === id);
@@ -2161,36 +2453,39 @@
                 } else {
                     removeImage();
                 }
+                currentImageFile = null;
                 document.getElementById('contentModal').classList.add('active');
             }
         }
 
-        // 删除内容
-        function deleteContent(type, id) {
-            if (confirm('确定要删除这条内容吗？')) {
-                if (type === 'announcements') {
-                    announcements = announcements.filter(a => a.id !== id);
-                    renderAnnouncements();
-                } else {
-                    newsData = newsData.filter(n => n.id !== id);
-                    renderNews();
-                }
-                saveData();
-                renderAdminPanel();
+        async function deleteContent(type, id) {
+            if (!confirm('确定要删除这条内容吗？')) return;
+            if (type === 'announcements') {
+                announcements = announcements.filter(a => a.id !== id);
+                renderAnnouncements();
+            } else {
+                newsData = newsData.filter(n => n.id !== id);
+                renderNews();
             }
+            renderAdminPanel();
+            await saveData();
         }
 
-        // 图片预览
-        let currentImageBase64 = null;
-
+        // ========== 图片处理 ==========
         function previewImage(input) {
             if (input.files && input.files[0]) {
+                if (input.files[0].size > 5 * 1024 * 1024) {
+                    showToast('图片大小不能超过 5MB', 'error');
+                    input.value = '';
+                    return;
+                }
+                currentImageFile = input.files[0];
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     document.getElementById('previewImg').src = e.target.result;
                     document.getElementById('imagePreview').style.display = 'block';
                     currentImageBase64 = e.target.result;
-                }
+                };
                 reader.readAsDataURL(input.files[0]);
             }
         }
@@ -2200,33 +2495,49 @@
             document.getElementById('imagePreview').style.display = 'none';
             document.getElementById('previewImg').src = '';
             currentImageBase64 = null;
+            currentImageFile = null;
         }
 
-        // 保存内容
-        document.getElementById('contentForm').addEventListener('submit', function(e) {
+        // ========== 保存内容表单 ==========
+        document.getElementById('contentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            const submitBtn = this.querySelector('.submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '保存中...';
+
             const type = document.getElementById('contentType').value;
             const id = document.getElementById('contentId').value;
             const title = document.getElementById('contentTitle').value;
             const content = document.getElementById('contentBody').value;
             const tag = document.getElementById('contentTag').value || '通用';
-            const image = currentImageBase64 || '';
+
+            let image = '';
+            if (currentImageFile) {
+                showToast('正在上传图片...', 'info');
+                const imageUrl = await uploadImageToGitHub(currentImageFile);
+                if (imageUrl) {
+                    image = imageUrl;
+                } else {
+                    showToast('图片上传失败', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '保存';
+                    return;
+                }
+            } else if (currentImageBase64) {
+                image = currentImageBase64;
+            }
 
             const newData = {
                 id: id ? parseInt(id) : Date.now(),
-                title,
-                content,
+                title, content,
                 date: new Date().toISOString().split('T')[0],
-                tag,
-                image
+                tag, image
             };
 
             if (type === 'announcements') {
                 if (id) {
                     const index = announcements.findIndex(a => a.id === parseInt(id));
-                    if (index !== -1) {
-                        announcements[index] = { ...announcements[index], ...newData };
-                    }
+                    if (index !== -1) announcements[index] = { ...announcements[index], ...newData };
                 } else {
                     announcements.unshift(newData);
                 }
@@ -2234,23 +2545,24 @@
             } else {
                 if (id) {
                     const index = newsData.findIndex(n => n.id === parseInt(id));
-                    if (index !== -1) {
-                        newsData[index] = { ...newsData[index], ...newData };
-                    }
+                    if (index !== -1) newsData[index] = { ...newsData[index], ...newData };
                 } else {
                     newsData.unshift(newData);
                 }
                 renderNews();
             }
 
-            saveData();
             renderAdminPanel();
+            await saveData();
+
             closeModal('contentModal');
-            document.getElementById('contentForm').reset();
+            this.reset();
             removeImage();
+            submitBtn.disabled = false;
+            submitBtn.textContent = '保存';
         });
 
-        // 导航栏滚动效果
+        // ========== 导航栏滚动效果 ==========
         window.addEventListener('scroll', function() {
             const navbar = document.getElementById('navbar');
             if (window.scrollY > 50) {
@@ -2260,7 +2572,7 @@
             }
         });
 
-        // 移动端菜单切换
+        // ========== 移动端菜单切换 ==========
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const navLinks = document.getElementById('navLinks');
 
@@ -2276,7 +2588,6 @@
             }
         });
 
-        // 点击导航链接后关闭移动端菜单
         document.querySelectorAll('.nav-links a').forEach(link => {
             link.addEventListener('click', function() {
                 navLinks.classList.remove('active');
@@ -2286,7 +2597,7 @@
             });
         });
 
-        // 滚动动画观察器
+        // ========== 滚动动画观察器 ==========
         const observerOptions = {
             threshold: 0.1,
             rootMargin: '0px 0px -50px 0px'
@@ -2304,7 +2615,7 @@
             observer.observe(el);
         });
 
-        // 数字动画效果
+        // ========== 数字动画效果 ==========
         function animateNumbers() {
             const statNumbers = document.querySelectorAll('.stat-number');
             statNumbers.forEach(stat => {
@@ -2323,14 +2634,15 @@
             });
         }
 
-        // 页面加载时初始化
-        window.addEventListener('load', function() {
-            renderAnnouncements();
-            renderNews();
+        // ========== 页面初始化 ==========
+        window.addEventListener('load', async function() {
+            await handleOAuthCallback();
+            if (!isLoggedIn) restoreSession();
+            await loadData();
             animateNumbers();
         });
 
-        // 平滑滚动到锚点
+        // ========== 平滑滚动到锚点 ==========
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 e.preventDefault();
