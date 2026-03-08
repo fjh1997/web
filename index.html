@@ -1234,6 +1234,7 @@
         .admin-news-list {
             max-height: 300px;
             overflow-y: auto;
+            width: 100%;
         }
 
         .admin-news-item {
@@ -1244,16 +1245,23 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .admin-news-item-info {
             flex: 1;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .admin-news-item-info h4 {
             font-size: 13px;
             color: var(--text-dark);
             margin-bottom: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .admin-news-item-info span {
