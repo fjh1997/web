@@ -205,11 +205,12 @@
         }
 
         .banner h1 {
-            font-size: 56px;
+            font-size: clamp(24px, 4.5vw, 56px);
             margin-bottom: 25px;
             font-weight: 700;
             text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
             letter-spacing: 2px;
+            white-space: nowrap;
         }
 
         .banner p {
@@ -1491,7 +1492,7 @@
             }
 
             .banner h1 {
-                font-size: 42px;
+                white-space: normal;
             }
 
             .banner p {
@@ -1533,7 +1534,7 @@
 
         @media (max-width: 768px) {
             .banner h1 {
-                font-size: 32px;
+                white-space: normal;
             }
 
             .banner p {
@@ -1569,7 +1570,7 @@
 
         @media (max-width: 480px) {
             .banner h1 {
-                font-size: 26px;
+                font-size: 20px;
             }
 
             .banner p {
