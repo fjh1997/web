@@ -2367,6 +2367,7 @@
             if (newsJsonData && Array.isArray(newsJsonData)) newsData = newsJsonData;
             renderAnnouncements();
             renderNews();
+            if (isLoggedIn) renderAdminPanel();
         }
 
         async function saveData() {
