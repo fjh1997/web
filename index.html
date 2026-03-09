@@ -160,7 +160,7 @@
             background: linear-gradient(135deg, rgba(10, 44, 77, 0.85), rgba(16, 185, 129, 0.75)),
                         url('pic/1900.jpg');
             background-size: cover;
-            background-position: center;
+            background-position: center 40%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -168,6 +168,43 @@
             color: white;
             position: relative;
             overflow: hidden;
+        }
+
+        .visit-counter {
+            position: absolute;
+            top: 30%;
+            right: 160px;
+            transform: translateY(-50%);
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 12px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: rgba(255, 255, 255, 0.9);
+            font-family: 'Arial', sans-serif;
+        }
+
+        .visit-counter .visit-label {
+            font-size: 12px;
+            opacity: 0.8;
+            letter-spacing: 2px;
+        }
+
+        .visit-counter .visit-count {
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .visit-counter i {
+            font-size: 14px;
+            opacity: 0.8;
         }
 
         .banner::before {
@@ -355,6 +392,10 @@
             color: var(--primary-color);
             margin-bottom: 10px;
             font-family: 'Arial', sans-serif;
+        }
+
+        .stat-suffix {
+            font-size: 0.6em;
         }
 
         .stat-label {
@@ -673,6 +714,29 @@
             color: var(--text-dark);
             font-weight: 500;
             line-height: 1.3;
+        }
+
+        .military-partner {
+            border: 2px solid #d4a017;
+            background: linear-gradient(135deg, #fffbea, #ffffff);
+        }
+
+        .military-partner i {
+            color: #d4a017;
+        }
+
+        .military-partner span {
+            color: #b8860b;
+            font-weight: 700;
+        }
+
+        .military-text {
+            color: #b8860b;
+            font-weight: 700;
+        }
+
+        .banner .military-text {
+            color: #f5b041;
         }
 
         /* 现代理念 */
@@ -1659,9 +1723,14 @@
 
     <!-- Banner区 -->
     <section class="banner" id="home">
+        <div class="visit-counter">
+            <i class="fas fa-eye"></i>
+            <span class="visit-label">访问量</span>
+            <span class="visit-count" id="pageViews">-</span>
+        </div>
         <div class="banner-content">
             <h1>始于1999 · 印象校联 · 用心服务好每一个门店</h1>
-            <p>中国高校后勤商业服务领先品牌 | 全国教育超市样板店 | 省教育超市标准店 | 部队超市经营入库企业</p>
+            <p>中国高校后勤商业服务领先品牌 | 全国教育超市样板店 | 省教育超市标准店 | <strong class="military-text">部队超市经营入库企业</strong></p>
             <div style="margin-top: 30px;">
                 <a href="#about" class="banner-btn">了解我们</a>
                 <a href="#contact" class="banner-btn primary">合作加盟</a>
@@ -1673,16 +1742,16 @@
     <section class="section about-section" id="about">
         <div class="section-title fade-in">
             <h2>关于我们</h2>
-            <p>深耕校园、部队机关后勤服务25年，打造生活服务类行业标杆</p>
+            <p>深耕校园、<span class="military-text">部队</span>机关后勤服务25年，打造生活服务类行业标杆</p>
         </div>
         <div class="about-content">
             <div class="about-text fade-in">
                 <h3>从1999年起步，专注校园服务25载</h3>
                 <p>杭州印象校联企业管理有限公司前身系杭州劲力贸易有限公司，成立于1999年4月，2010年3月正式更名。公司现坐落于浙江省杭州市钱塘区学林街1298-1306号，注册资本2500万元（实到2500万），拥有200余人的专业服务团队。</p>
-                <p>公司经营范围主要从事学校、机关单位、部队等教育超市连锁经营、美食餐饮服务管理、后勤商业体经营管理和产品配送服务及量身定制等业务。25年来已为河北科技大学、浙大城市学院、浙江理工大学、中国计量大学、浙江树人大学、浙江工商大学、杭州电子科技大学、浙江财经大学、浙江传媒学院、浙江金融职业学院等百余所院校及机关单位提供教育超市商业服务。</p>
+                <p>公司经营范围主要从事学校、机关单位、<span class="military-text">部队</span>等教育超市连锁经营、美食餐饮服务管理、后勤商业体经营管理和产品配送服务及量身定制等业务。25年来已为河北科技大学、浙大城市学院、浙江理工大学、中国计量大学、浙江树人大学、浙江工商大学、杭州电子科技大学、浙江财经大学、浙江传媒学院、浙江金融职业学院等百余所院校及机关单位提供教育超市商业服务。</p>
                 <p>以杭州电子科技大学钱塘校区教育超市为旗舰，面积达550平方米，荣获"全国教育超市样板店"称号，多家超市获"浙江省教育超市标准店""高校超市示范店""高校后勤物业系统先进集体"等称号。2025年顺利通过ISO9001、ISO22000、ISO14001、ISO45001及五星售后服务认证。</p>
                 <div class="about-highlight">
-                    <i class="fas fa-star"></i> 全国教育超市样板店 | 省教育超市标准店 | 部队超市经营入库企业 | ISO五体系认证
+                    <i class="fas fa-star"></i> 全国教育超市样板店 | 省教育超市标准店 | <strong class="military-text">部队超市经营入库企业</strong> | ISO五体系认证
                 </div>
             </div>
             <div class="stats-grid">
@@ -1703,12 +1772,12 @@
                     <div class="stat-label">余种在售商品</div>
                 </div>
                 <div class="stat-card fade-in">
-                    <div class="stat-number" data-target="80">0</div>
-                    <div class="stat-label">% 一线品牌占比</div>
+                    <div class="stat-number" data-target="80">0<span class="stat-suffix">%</span></div>
+                    <div class="stat-label">一线品牌占比</div>
                 </div>
                 <div class="stat-card fade-in">
-                    <div class="stat-number" data-target="95">0</div>
-                    <div class="stat-label">% 师生满意度</div>
+                    <div class="stat-number" data-target="95">0<span class="stat-suffix">%</span></div>
+                    <div class="stat-label">师生满意度</div>
                 </div>
             </div>
         </div>
@@ -1904,6 +1973,46 @@
             <div class="partner-logo fade-in">
                 <i class="fas fa-university"></i>
                 <span>安徽财经大学</span>
+            </div>
+            <div class="partner-logo fade-in">
+                <i class="fas fa-university"></i>
+                <span>山东工程技师学院</span>
+            </div>
+            <div class="partner-logo fade-in">
+                <i class="fas fa-university"></i>
+                <span>河北科技大学</span>
+            </div>
+            <div class="partner-logo fade-in">
+                <i class="fas fa-university"></i>
+                <span>杭州职业技术大学</span>
+            </div>
+            <div class="partner-logo fade-in">
+                <i class="fas fa-university"></i>
+                <span>浙大城市学院</span>
+            </div>
+            <div class="partner-logo fade-in">
+                <i class="fas fa-university"></i>
+                <span>浙江水利水电学院</span>
+            </div>
+            <div class="partner-logo fade-in">
+                <i class="fas fa-university"></i>
+                <span>赣南医学院</span>
+            </div>
+            <div class="partner-logo fade-in">
+                <i class="fas fa-university"></i>
+                <span>浙江邮电职业技术学院</span>
+            </div>
+            <div class="partner-logo fade-in">
+                <i class="fas fa-university"></i>
+                <span>杭州电子科技大学信息工程学院</span>
+            </div>
+            <div class="partner-logo fade-in">
+                <i class="fas fa-university"></i>
+                <span>浙江公路技师学院</span>
+            </div>
+            <div class="partner-logo fade-in military-partner">
+                <i class="fas fa-shield-alt"></i>
+                <span>某部队（保密）</span>
             </div>
         </div>
     </section>
@@ -2103,7 +2212,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2025 杭州印象校联企业管理有限公司 版权所有 | <a href="https://beian.miit.gov.cn/" target="_blank" style="color:#fff;text-decoration:none;">浙ICP备2026010810号-1</a> | 访问量: <span id="pageViews">-</span></p>
+            <p>&copy; 2025 杭州印象校联企业管理有限公司 版权所有 | <a href="https://beian.miit.gov.cn/" target="_blank" style="color:#fff;text-decoration:none;">浙ICP备2026010810号-1</a></p>
         </div>
     </footer>
 
@@ -2707,15 +2816,17 @@
             const statNumbers = document.querySelectorAll('.stat-number');
             statNumbers.forEach(stat => {
                 const target = parseInt(stat.dataset.target);
+                const suffix = stat.querySelector('.stat-suffix');
+                const suffixHTML = suffix ? suffix.outerHTML : '';
                 let current = 0;
                 const increment = target / 50;
                 const timer = setInterval(() => {
                     current += increment;
                     if (current >= target) {
-                        stat.textContent = target;
+                        stat.innerHTML = target + suffixHTML;
                         clearInterval(timer);
                     } else {
-                        stat.textContent = Math.floor(current);
+                        stat.innerHTML = Math.floor(current) + suffixHTML;
                     }
                 }, 30);
             });
