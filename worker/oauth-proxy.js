@@ -56,7 +56,7 @@ export default {
       }
     }
 
-    // ===== GitHub API 代理 =====
+    // ===== GitHub API 代理（带缓存） =====
     if (url.pathname.startsWith('/api/github/')) {
       const githubPath = url.pathname.replace('/api/github/', '');
       const githubUrl = `https://api.github.com/${githubPath}${url.search}`;
@@ -68,6 +68,19 @@ export default {
       const authHeader = request.headers.get('Authorization');
       if (authHeader) headers['Authorization'] = authHeader;
 
+      // 未认证的 GET 请求走缓存（120秒），避免 GitHub API 限流
+      const isUnauthGet = request.method === 'GET' && !authHeader;
+      if (isUnauthGet) {
+        const cache = caches.default;
+        const cacheKey = new Request(githubUrl, { method: 'GET', headers: { 'Accept': 'application/json' } });
+        const cached = await cache.match(cacheKey);
+        if (cached) {
+          const resp = new Response(cached.body, cached);
+          resp.headers.set('Access-Control-Allow-Origin', corsHeaders['Access-Control-Allow-Origin']);
+          return resp;
+        }
+      }
+
       try {
         const ghResp = await fetch(githubUrl, {
           method: request.method,
@@ -76,6 +89,16 @@ export default {
         });
 
         const respHeaders = { ...corsHeaders, 'Content-Type': ghResp.headers.get('Content-Type') || 'application/json' };
+
+        if (isUnauthGet && ghResp.ok) {
+          const body = await ghResp.text();
+          const cacheResp = new Response(body, { status: 200, headers: { ...respHeaders, 'Cache-Control': 'public, max-age=120' } });
+          const cache = caches.default;
+          const cacheKey = new Request(githubUrl, { method: 'GET', headers: { 'Accept': 'application/json' } });
+          await cache.put(cacheKey, cacheResp.clone());
+          return cacheResp;
+        }
+
         return new Response(ghResp.body, { status: ghResp.status, headers: respHeaders });
       } catch {
         return jsonResp({ error: 'GitHub API proxy failed' }, 502, corsHeaders);
