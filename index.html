@@ -739,6 +739,10 @@
             color: #f5b041;
         }
 
+        .about-highlight .military-text {
+            color: #fce4a8;
+        }
+
         /* 现代理念 */
         .concept-section {
             background: linear-gradient(135deg, #0A2C4D, #1a3d5c);
@@ -1631,6 +1635,25 @@
             .banner {
                 height: 550px;
             }
+
+            .visit-counter {
+                top: 70px;
+                right: 10px;
+                padding: 6px 12px;
+                border-radius: 8px;
+            }
+
+            .visit-counter .visit-label {
+                font-size: 10px;
+            }
+
+            .visit-counter .visit-count {
+                font-size: 16px;
+            }
+
+            .visit-counter i {
+                font-size: 11px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -1644,6 +1667,10 @@
 
             .partners-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .visit-counter {
+                display: none;
             }
 
             .stats-grid {
