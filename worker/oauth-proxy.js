@@ -45,6 +45,17 @@ export default {
       }
     }
 
+    // ===== 访问计数器 =====
+    if (url.pathname === '/api/counter' && request.method === 'GET') {
+      try {
+        const count = parseInt(await env.COUNTER.get('page_views') || '0') + 1;
+        await env.COUNTER.put('page_views', count.toString());
+        return jsonResp({ count }, 200, corsHeaders);
+      } catch {
+        return jsonResp({ count: 0 }, 200, corsHeaders);
+      }
+    }
+
     // ===== GitHub API 代理 =====
     if (url.pathname.startsWith('/api/github/')) {
       const githubPath = url.pathname.replace('/api/github/', '');

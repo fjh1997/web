@@ -3,6 +3,10 @@ main = "oauth-proxy.js"
 compatibility_date = "2024-01-01"
 account_id = "950409871f12a4354d61ddaab6ae2843"
 
+[[kv_namespaces]]
+binding = "COUNTER"
+id = "c7a0a7b3c58440e38ab5b374ff389a3a"
+
 # 环境变量通过 wrangler secret put 命令设置，不要写在这里：
 # GITHUB_CLIENT_ID
 # GITHUB_CLIENT_SECRET

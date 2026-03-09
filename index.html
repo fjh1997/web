@@ -2103,7 +2103,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2025 杭州印象校联企业管理有限公司 版权所有 | <a href="https://beian.miit.gov.cn/" target="_blank" style="color:#fff;text-decoration:none;">浙ICP备2026010810号-1</a></p>
+            <p>&copy; 2025 杭州印象校联企业管理有限公司 版权所有 | <a href="https://beian.miit.gov.cn/" target="_blank" style="color:#fff;text-decoration:none;">浙ICP备2026010810号-1</a> | 访问量: <span id="pageViews">-</span></p>
         </div>
     </footer>
 
@@ -2727,6 +2727,10 @@
             if (!isLoggedIn) restoreSession();
             await loadData();
             animateNumbers();
+            // 访问计数
+            fetch(`${OAUTH_WORKER_URL}/api/counter`).then(r => r.json()).then(d => {
+                if (d.count) document.getElementById('pageViews').textContent = d.count;
+            }).catch(() => {});
         });
 
         // ========== 平滑滚动到锚点 ==========
