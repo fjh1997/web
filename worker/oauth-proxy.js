@@ -66,10 +66,16 @@ export default {
         'User-Agent': 'cloudflare-worker-proxy',
       };
       const authHeader = request.headers.get('Authorization');
-      if (authHeader) headers['Authorization'] = authHeader;
+      if (authHeader) {
+        headers['Authorization'] = authHeader;
+      } else if (env.GITHUB_TOKEN) {
+        // 客户端未认证时，使用服务端 Token 提升 API 速率限制（60→5000次/小时）
+        headers['Authorization'] = `Bearer ${env.GITHUB_TOKEN}`;
+      }
 
-      // 未认证的 GET 请求走缓存（120秒），避免 GitHub API 限流
-      const isUnauthGet = request.method === 'GET' && !authHeader;
+      // 无任何 Token 的 GET 请求走缓存（120秒），避免 GitHub API 限流
+      const hasAuth = authHeader || env.GITHUB_TOKEN;
+      const isUnauthGet = request.method === 'GET' && !hasAuth;
       if (isUnauthGet) {
         const cache = caches.default;
         const cacheKey = new Request(githubUrl, { method: 'GET', headers: { 'Accept': 'application/json' } });
