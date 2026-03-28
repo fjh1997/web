@@ -1003,6 +1003,31 @@
             margin-bottom: 12px;
         }
 
+        .news-list-toggle-wrap {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .news-list-toggle {
+            padding: 12px 32px;
+            border: none;
+            border-radius: 999px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.18);
+        }
+
+        .news-list-toggle:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(30, 64, 175, 0.22);
+        }
+
         /* 页脚 */
         .footer {
             background: var(--text-dark);
@@ -2264,6 +2289,7 @@
         const RAW_BASE = `https://cdn.jsdelivr.net/gh/${GITHUB_OWNER}/${GITHUB_REPO}@${GITHUB_BRANCH}`;
         const API_BASE = `${OAUTH_WORKER_URL}/api/github/repos/${GITHUB_OWNER}/${GITHUB_REPO}`;
         const USER_API = `${OAUTH_WORKER_URL}/api/github/user`;
+        const IS_LOCAL_PREVIEW = ['127.0.0.1', 'localhost'].includes(window.location.hostname) || window.location.protocol === 'file:';
 
         // ========== 默认数据（fallback） ==========
         const defaultAnnouncements = [
@@ -2288,6 +2314,11 @@
         let githubToken = null;
         let githubUser = null;
         let isSaving = false;
+        const NEWS_PREVIEW_COUNT = 6;
+        const newsListExpanded = {
+            announcements: false,
+            news: false
+        };
 
         // ========== Toast 通知 ==========
         function showToast(message, type = 'info') {
@@ -2314,23 +2345,55 @@
             } catch { return null; }
         }
 
-        async function readJsonFromGitHub(path) {
+        async function readJsonFromUrl(url) {
             try {
-                // 优先用 GitHub API 读取（无缓存，始终最新）
-                const apiResp = await githubApiFetch(`${API_BASE}/contents/${path}?ref=${GITHUB_BRANCH}`);
-                if (apiResp.ok) {
-                    const data = await apiResp.json();
-                    return JSON.parse(decodeURIComponent(escape(atob(data.content.replace(/\n/g, '')))));
-                }
-                // 降级：用 raw URL
-                const rawResp = await fetch(`${RAW_BASE}/${path}?t=${Date.now()}`);
-                if (rawResp.ok) return await rawResp.json();
+                const resp = await fetch(url, { cache: 'no-store' });
+                if (!resp.ok) return null;
+                return await resp.json();
+            } catch {
                 return null;
-            } catch { return null; }
+            }
+        }
+
+        async function readJsonFromGitHub(path) {
+            // 公共页面优先读同源静态文件，本地预览和正式站都不会碰到 Worker 的 CORS 限制
+            const localData = await readJsonFromUrl(`${path}?t=${Date.now()}`);
+            if (localData) return localData;
+
+            // 同源文件不可用时再退回公开 CDN
+            const cdnData = await readJsonFromUrl(`${RAW_BASE}/${path}?t=${Date.now()}`);
+            if (cdnData) return cdnData;
+
+            // 只有非本地场景才尝试 Worker API，避免本地预览出现跨域报错
+            if (IS_LOCAL_PREVIEW) return null;
+
+            try {
+                const apiResp = await githubApiFetch(`${API_BASE}/contents/${path}?ref=${GITHUB_BRANCH}`);
+                if (!apiResp.ok) return null;
+                const data = await apiResp.json();
+                return JSON.parse(decodeURIComponent(escape(atob(data.content.replace(/\n/g, '')))));
+            } catch {
+                return null;
+            }
         }
 
         function utf8ToBase64(str) {
             return btoa(unescape(encodeURIComponent(str)));
+        }
+
+        function resolveImageSrc(image) {
+            if (!image) return '';
+            if (image.startsWith('data:')) return image;
+            if (image.startsWith('data/images/')) return image;
+            if (image.startsWith('/data/images/')) return image;
+
+            const repoPrefix = `${RAW_BASE}/`;
+            if (image.startsWith(repoPrefix)) {
+                const relativePath = image.slice(repoPrefix.length);
+                return IS_LOCAL_PREVIEW ? relativePath : image;
+            }
+
+            return image;
         }
 
         async function writeJsonToGitHub(path, data, commitMessage) {
@@ -2382,7 +2445,7 @@
                             })
                         });
                         if (resp.ok) {
-                            resolve(`${RAW_BASE}/${filePath}`);
+                            resolve(filePath);
                         } else {
                             resolve(null);
                         }
@@ -2546,9 +2609,9 @@
         }
 
         // ========== 渲染函数 ==========
-        function renderAnnouncements() {
-            const container = document.getElementById('announcements');
-            container.innerHTML = announcements.map(item => `
+        function renderNewsItem(item) {
+            const imageSrc = resolveImageSrc(item.image);
+            return `
                 <div class="news-item fade-in">
                     <div class="news-date">
                         <div class="day">${item.date.split('-')[2]}</div>
@@ -2557,31 +2620,37 @@
                     <div class="news-content">
                         <span class="news-tag">${item.tag}</span>
                         <h3>${item.title}</h3>
-                        ${item.image ? `<img src="${item.image}" alt="${item.title}" style="max-width: 100%; max-height: 300px; border-radius: 10px; margin-bottom: 15px;">` : ''}
+                        ${imageSrc ? `<img src="${imageSrc}" alt="${item.title}" style="max-width: 100%; max-height: 300px; border-radius: 10px; margin-bottom: 15px;">` : ''}
                         <p>${item.content}</p>
                     </div>
                 </div>
-            `).join('');
+            `;
+        }
+
+        function renderNewsList(type, items, containerId, label) {
+            const container = document.getElementById(containerId);
+            const isExpanded = newsListExpanded[type];
+            const visibleItems = isExpanded ? items : items.slice(0, NEWS_PREVIEW_COUNT);
+
+            container.innerHTML = `
+                ${visibleItems.map(renderNewsItem).join('')}
+                ${items.length > NEWS_PREVIEW_COUNT ? `
+                    <div class="news-list-toggle-wrap">
+                        <button type="button" class="news-list-toggle" onclick="toggleNewsList('${type}')">
+                            ${isExpanded ? '收起列表' : `展开更多${label}`}
+                        </button>
+                    </div>
+                ` : ''}
+            `;
             observeNewElements();
         }
 
+        function renderAnnouncements() {
+            renderNewsList('announcements', announcements, 'announcements', '公告');
+        }
+
         function renderNews() {
-            const container = document.getElementById('news');
-            container.innerHTML = newsData.map(item => `
-                <div class="news-item fade-in">
-                    <div class="news-date">
-                        <div class="day">${item.date.split('-')[2]}</div>
-                        <div class="month">${item.date.split('-')[1]}月</div>
-                    </div>
-                    <div class="news-content">
-                        <span class="news-tag">${item.tag}</span>
-                        <h3>${item.title}</h3>
-                        ${item.image ? `<img src="${item.image}" alt="${item.title}" style="max-width: 100%; max-height: 300px; border-radius: 10px; margin-bottom: 15px;">` : ''}
-                        <p>${item.content}</p>
-                    </div>
-                </div>
-            `).join('');
-            observeNewElements();
+            renderNewsList('news', newsData, 'news', '新闻');
         }
 
         function renderAdminPanel() {
@@ -2616,6 +2685,15 @@
         function observeNewElements() {
             const newElements = document.querySelectorAll('.news-item.fade-in:not(.visible)');
             newElements.forEach(el => observer.observe(el));
+        }
+
+        function toggleNewsList(type) {
+            newsListExpanded[type] = !newsListExpanded[type];
+            if (type === 'announcements') {
+                renderAnnouncements();
+            } else {
+                renderNews();
+            }
         }
 
         // ========== 标签切换 ==========
@@ -2875,10 +2953,7 @@
             if (!isLoggedIn) restoreSession();
             await loadData();
             animateNumbers();
-            // 访问计数
-            fetch(`${OAUTH_WORKER_URL}/api/counter`).then(r => r.json()).then(d => {
-                if (d.count) document.getElementById('pageViews').textContent = d.count;
-            }).catch(() => {});
+            // 访问量接口当前存在跨域限制，这里先保留静态占位，避免影响页面浏览
         });
 
         // ========== 平滑滚动到锚点 ==========
