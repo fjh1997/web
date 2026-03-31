@@ -34,12 +34,21 @@ function validateSession(req) {
 }
 
 function getCounter() {
-  try { return JSON.parse(fs.readFileSync(COUNTER_FILE, 'utf8')).count || 0; }
-  catch { return 0; }
+  try {
+    const data = JSON.parse(fs.readFileSync(COUNTER_FILE, 'utf8'));
+    const today = new Date().toISOString().split('T')[0];
+    if (data.date !== today) {
+      data.today = 0;
+      data.date = today;
+    }
+    return data;
+  } catch {
+    return { total: 0, today: 0, date: new Date().toISOString().split('T')[0] };
+  }
 }
 
-function setCounter(count) {
-  fs.writeFileSync(COUNTER_FILE, JSON.stringify({ count }));
+function saveCounter(data) {
+  fs.writeFileSync(COUNTER_FILE, JSON.stringify(data));
 }
 
 function readBody(req) {
@@ -88,9 +97,11 @@ const server = http.createServer(async (req, res) => {
 
   // --- Counter ---
   if (pathname === '/api/counter' && req.method === 'GET') {
-    const count = getCounter() + 1;
-    setCounter(count);
-    return json(res, { count });
+    const data = getCounter();
+    data.total++;
+    data.today++;
+    saveCounter(data);
+    return json(res, { total: data.total, today: data.today });
   }
 
   // --- Save data (announcements.json / news.json) ---

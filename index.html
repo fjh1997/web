@@ -183,11 +183,24 @@
             border-radius: 12px;
             padding: 12px 20px;
             display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 16px;
+            color: rgba(255, 255, 255, 0.9);
+            font-family: 'Arial', sans-serif;
+        }
+
+        .visit-stat {
+            display: flex;
             flex-direction: column;
             align-items: center;
             gap: 4px;
-            color: rgba(255, 255, 255, 0.9);
-            font-family: 'Arial', sans-serif;
+        }
+
+        .visit-divider {
+            width: 1px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .visit-counter .visit-label {
@@ -1776,9 +1789,17 @@
     <!-- Banner区 -->
     <section class="banner" id="home">
         <div class="visit-counter">
-            <i class="fas fa-eye"></i>
-            <span class="visit-label">访问量</span>
-            <span class="visit-count" id="pageViews">-</span>
+            <div class="visit-stat">
+                <i class="fas fa-eye"></i>
+                <span class="visit-label">今日</span>
+                <span class="visit-count" id="todayViews">-</span>
+            </div>
+            <div class="visit-divider"></div>
+            <div class="visit-stat">
+                <i class="fas fa-chart-line"></i>
+                <span class="visit-label">总访问</span>
+                <span class="visit-count" id="totalViews">-</span>
+            </div>
         </div>
         <div class="banner-content">
             <h1>始于1999 · 印象校联 · 用心服务好每一个门店</h1>
@@ -2831,7 +2852,8 @@
                 const resp = await fetch(`${API_BASE}/counter`);
                 if (resp.ok) {
                     const data = await resp.json();
-                    document.getElementById('pageViews').textContent = data.count;
+                    document.getElementById('todayViews').textContent = data.today;
+                    document.getElementById('totalViews').textContent = data.total;
                 }
             } catch {}
         });
