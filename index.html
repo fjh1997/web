@@ -2163,13 +2163,18 @@
                 <h2>管理员登录</h2>
                 <button class="close-btn" onclick="closeModal('loginModal')">&times;</button>
             </div>
-            <div style="padding: 20px 0;">
-                <button class="github-login-btn" id="githubLoginBtn" onclick="startGitHubLogin()">
-                    <i class="fab fa-github"></i> 使用 GitHub 登录
-                </button>
-                <p class="login-hint">使用 GitHub 账号登录，需要对仓库有写入权限。</p>
+            <form id="loginForm" style="padding: 20px 0;">
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="email" id="loginEmail" placeholder="请输入邮箱" required>
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="loginPassword" placeholder="请输入密码" required>
+                </div>
                 <p class="error-msg" id="loginError"></p>
-            </div>
+                <button type="submit" class="submit-btn" id="loginBtn">登录</button>
+            </form>
         </div>
     </div>
 
@@ -2211,7 +2216,7 @@
     <!-- 管理员面板 -->
     <div class="admin-panel" id="adminPanel">
         <h3>管理员面板</h3>
-        <div class="github-user-info" id="githubUserInfo" style="display:none;"></div>
+        <div id="adminUserInfo" style="padding: 8px 0; color: #10b981; font-size: 14px; display: none;"></div>
         <div class="admin-actions">
             <button class="admin-btn" onclick="showAddModal('announcements')">添加公告</button>
             <button class="admin-btn" onclick="showAddModal('news')">添加新闻</button>
@@ -2221,7 +2226,7 @@
         <h4 style="margin-top: 20px;">新闻列表</h4>
         <div class="admin-news-list" id="adminNewsList"></div>
         <div class="admin-actions" style="margin-top: 20px;">
-            <button class="admin-btn logout" onclick="logout()">退出 GitHub 登录</button>
+            <button class="admin-btn logout" onclick="logout()">退出登录</button>
         </div>
     </div>
 
@@ -2280,16 +2285,7 @@
 
     <script>
         // ========== 配置 ==========
-        // TODO: 部署前请填入你的 GitHub OAuth App 的 Client ID 和 Cloudflare Worker URL
-        const GITHUB_OWNER = 'fjh1997';
-        const GITHUB_REPO = 'web';
-        const GITHUB_BRANCH = 'main';
-        const OAUTH_WORKER_URL = 'https://workers.yxxlhz.com';
-        const GITHUB_CLIENT_ID = 'Iv23livknmABGwCaBIk7';
-        const RAW_BASE = `https://cdn.jsdelivr.net/gh/${GITHUB_OWNER}/${GITHUB_REPO}@${GITHUB_BRANCH}`;
-        const API_BASE = `${OAUTH_WORKER_URL}/api/github/repos/${GITHUB_OWNER}/${GITHUB_REPO}`;
-        const USER_API = `${OAUTH_WORKER_URL}/api/github/user`;
-        const IS_LOCAL_PREVIEW = ['127.0.0.1', 'localhost'].includes(window.location.hostname) || window.location.protocol === 'file:';
+        const API_BASE = '/api';
 
         // ========== 默认数据（fallback） ==========
         const defaultAnnouncements = [
@@ -2311,8 +2307,8 @@
         let editingItem = null;
         let currentImageBase64 = null;
         let currentImageFile = null;
-        let githubToken = null;
-        let githubUser = null;
+        let authToken = null;
+        let authUser = null;
         let isSaving = false;
         const NEWS_PREVIEW_COUNT = 6;
         const newsListExpanded = {
@@ -2330,260 +2326,136 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
-        // ========== GitHub API 工具函数 ==========
-        async function githubApiFetch(url, options = {}) {
-            const headers = { 'Accept': 'application/vnd.github.v3+json', ...options.headers };
-            if (githubToken) headers['Authorization'] = `Bearer ${githubToken}`;
-            return fetch(url, { ...options, headers });
-        }
-
-        async function getFileSha(path) {
-            try {
-                const resp = await githubApiFetch(`${API_BASE}/contents/${path}?ref=${GITHUB_BRANCH}`);
-                if (resp.ok) { const data = await resp.json(); return data.sha; }
-                return null;
-            } catch { return null; }
-        }
-
-        async function readJsonFromUrl(url) {
-            try {
-                const resp = await fetch(url, { cache: 'no-store' });
-                if (!resp.ok) return null;
-                return await resp.json();
-            } catch {
-                return null;
-            }
-        }
-
-        async function readJsonFromGitHub(path) {
-            // 公共页面优先读同源静态文件，本地预览和正式站都不会碰到 Worker 的 CORS 限制
-            const localData = await readJsonFromUrl(`${path}?t=${Date.now()}`);
-            if (localData) return localData;
-
-            // 同源文件不可用时再退回公开 CDN
-            const cdnData = await readJsonFromUrl(`${RAW_BASE}/${path}?t=${Date.now()}`);
-            if (cdnData) return cdnData;
-
-            // 只有非本地场景才尝试 Worker API，避免本地预览出现跨域报错
-            if (IS_LOCAL_PREVIEW) return null;
-
-            try {
-                const apiResp = await githubApiFetch(`${API_BASE}/contents/${path}?ref=${GITHUB_BRANCH}`);
-                if (!apiResp.ok) return null;
-                const data = await apiResp.json();
-                return JSON.parse(decodeURIComponent(escape(atob(data.content.replace(/\n/g, '')))));
-            } catch {
-                return null;
-            }
-        }
-
-        function utf8ToBase64(str) {
-            return btoa(unescape(encodeURIComponent(str)));
+        // ========== API 工具函数 ==========
+        function authHeaders() {
+            const h = { 'Content-Type': 'application/json' };
+            if (authToken) h['Authorization'] = `Bearer ${authToken}`;
+            return h;
         }
 
         function resolveImageSrc(image) {
             if (!image) return '';
-            if (image.startsWith('data:')) return image;
-            if (image.startsWith('data/images/')) return image;
-            if (image.startsWith('/data/images/')) return image;
-
-            const repoPrefix = `${RAW_BASE}/`;
-            if (image.startsWith(repoPrefix)) {
-                const relativePath = image.slice(repoPrefix.length);
-                return IS_LOCAL_PREVIEW ? relativePath : image;
-            }
-
             return image;
         }
 
-        async function writeJsonToGitHub(path, data, commitMessage) {
-            const content = utf8ToBase64(JSON.stringify(data, null, 2));
-            const sha = await getFileSha(path);
-            const body = { message: commitMessage, content, branch: GITHUB_BRANCH };
-            if (sha) body.sha = sha;
+        async function saveJsonData(filename, data) {
             try {
-                const resp = await githubApiFetch(`${API_BASE}/contents/${path}`, {
+                const resp = await fetch(`${API_BASE}/data/${filename}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
+                    headers: authHeaders(),
+                    body: JSON.stringify(data)
                 });
-                if (resp.ok) return true;
-                if (resp.status === 409) {
-                    // SHA 冲突，重试一次
-                    const newSha = await getFileSha(path);
-                    body.sha = newSha;
-                    const retry = await githubApiFetch(`${API_BASE}/contents/${path}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(body)
-                    });
-                    return retry.ok;
-                }
-                return false;
+                return resp.ok;
             } catch { return false; }
         }
 
-        async function uploadImageToGitHub(file) {
+        async function uploadImage(file) {
             if (file.size > 5 * 1024 * 1024) {
                 showToast('图片大小不能超过 5MB', 'error');
                 return null;
             }
-            const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-            const filePath = `data/images/${Date.now()}_${safeName}`;
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = async function(e) {
-                    const base64 = e.target.result.split(',')[1];
-                    try {
-                        const resp = await githubApiFetch(`${API_BASE}/contents/${filePath}`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                message: `Upload image: ${file.name}`,
-                                content: base64,
-                                branch: GITHUB_BRANCH
-                            })
-                        });
-                        if (resp.ok) {
-                            resolve(filePath);
-                        } else {
-                            resolve(null);
-                        }
-                    } catch { resolve(null); }
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        async function checkRepoPushAccess() {
+            const formData = new FormData();
+            formData.append('file', file);
             try {
-                const resp = await githubApiFetch(API_BASE);
+                const resp = await fetch(`${API_BASE}/upload`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${authToken}` },
+                    body: formData
+                });
                 if (resp.ok) {
                     const data = await resp.json();
-                    return data.permissions && data.permissions.push === true;
+                    return data.path;
                 }
-                return false;
-            } catch { return false; }
+                return null;
+            } catch { return null; }
         }
 
-        // ========== OAuth 流程 (GitHub App + PKCE) ==========
-        function generateRandomString(length) {
-            const arr = new Uint8Array(length);
-            crypto.getRandomValues(arr);
-            return Array.from(arr, b => b.toString(36).padStart(2, '0')).join('').substring(0, length);
-        }
+        // ========== 登录流程 ==========
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            const errorEl = document.getElementById('loginError');
+            btn.disabled = true;
+            btn.textContent = '登录中...';
+            errorEl.textContent = '';
 
-        async function generateCodeChallenge(verifier) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(verifier);
-            const digest = await crypto.subtle.digest('SHA-256', data);
-            return btoa(String.fromCharCode(...new Uint8Array(digest)))
-                .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-        }
-
-        async function startGitHubLogin() {
-            const state = generateRandomString(32);
-            const codeVerifier = generateRandomString(64);
-            sessionStorage.setItem('oauth_state', state);
-            sessionStorage.setItem('oauth_code_verifier', codeVerifier);
-            const codeChallenge = await generateCodeChallenge(codeVerifier);
-            const redirectUri = window.location.origin + window.location.pathname;
-            const params = new URLSearchParams({
-                client_id: GITHUB_CLIENT_ID,
-                redirect_uri: redirectUri,
-                state: state,
-                code_challenge: codeChallenge,
-                code_challenge_method: 'S256'
-            });
-            window.location.href = `https://github.com/login/oauth/authorize?${params}`;
-        }
-
-        async function handleOAuthCallback() {
-            const params = new URLSearchParams(window.location.search);
-            const code = params.get('code');
-            const state = params.get('state');
-            if (!code || !state) return;
-
-            const savedState = sessionStorage.getItem('oauth_state');
-            if (state !== savedState) {
-                showToast('登录验证失败，请重试', 'error');
-                history.replaceState({}, '', window.location.pathname);
-                return;
-            }
-            const codeVerifier = sessionStorage.getItem('oauth_code_verifier');
-            sessionStorage.removeItem('oauth_state');
-            sessionStorage.removeItem('oauth_code_verifier');
-            history.replaceState({}, '', window.location.pathname);
-
-            const btn = document.getElementById('githubLoginBtn');
-            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fab fa-github"></i> 登录中...'; }
-            document.getElementById('loginModal').classList.add('active');
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
 
             try {
-                const resp = await fetch(`${OAUTH_WORKER_URL}/api/oauth/token`, {
+                const resp = await fetch(`${API_BASE}/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code, code_verifier: codeVerifier })
+                    body: JSON.stringify({ username: email, password })
                 });
                 const data = await resp.json();
-                if (data.access_token) {
-                    sessionStorage.setItem('github_token', data.access_token);
-                    await completeLogin(data.access_token);
+                if (resp.ok && data.token) {
+                    authToken = data.token;
+                    authUser = data.username;
+                    sessionStorage.setItem('auth_token', data.token);
+                    sessionStorage.setItem('auth_user', data.username);
+                    completeLogin();
                 } else {
-                    showToast('登录失败: ' + (data.error_description || '未知错误'), 'error');
+                    errorEl.textContent = data.error || '登录失败';
                 }
-            } catch (err) {
-                showToast('登录失败，无法连接认证服务', 'error');
+            } catch {
+                errorEl.textContent = '无法连接服务器';
             }
 
-            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fab fa-github"></i> 使用 GitHub 登录'; }
-        }
+            btn.disabled = false;
+            btn.textContent = '登录';
+        });
 
-        async function completeLogin(token) {
-            githubToken = token;
-
-            const hasPush = await checkRepoPushAccess();
-            if (!hasPush) {
-                showToast('您没有该仓库的写入权限', 'error');
-                githubToken = null;
-                sessionStorage.removeItem('github_token');
-                return;
-            }
-
-            try {
-                const resp = await githubApiFetch(USER_API);
-                if (resp.ok) githubUser = await resp.json();
-            } catch {}
-
+        function completeLogin() {
             isLoggedIn = true;
             closeModal('loginModal');
             document.getElementById('adminPanel').classList.add('active');
             document.getElementById('adminLoginLink').innerHTML = '<i class="fas fa-user-check"></i> 已登录';
             document.getElementById('adminLoginLink').style.background = '#10b981';
 
-            if (githubUser) {
-                const info = document.getElementById('githubUserInfo');
-                info.innerHTML = `<img src="${githubUser.avatar_url}" alt="avatar"><span>${githubUser.login}</span>`;
-                info.style.display = 'flex';
-            }
+            const info = document.getElementById('adminUserInfo');
+            info.textContent = authUser;
+            info.style.display = 'block';
 
             renderAdminPanel();
             showToast('登录成功', 'success');
         }
 
-        function restoreSession() {
-            const token = sessionStorage.getItem('github_token');
-            if (token) completeLogin(token);
+        async function restoreSession() {
+            const token = sessionStorage.getItem('auth_token');
+            if (!token) return;
+            try {
+                const resp = await fetch(`${API_BASE}/session`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    authToken = token;
+                    authUser = data.username;
+                    completeLogin();
+                } else {
+                    sessionStorage.removeItem('auth_token');
+                    sessionStorage.removeItem('auth_user');
+                }
+            } catch {}
         }
 
         // ========== 数据加载/保存 ==========
         async function loadData() {
-            const [annData, newsJsonData] = await Promise.all([
-                readJsonFromGitHub('data/announcements.json'),
-                readJsonFromGitHub('data/news.json')
-            ]);
-            if (annData && Array.isArray(annData)) announcements = annData;
-            if (newsJsonData && Array.isArray(newsJsonData)) newsData = newsJsonData;
+            try {
+                const [annResp, newsResp] = await Promise.all([
+                    fetch(`data/announcements.json?t=${Date.now()}`),
+                    fetch(`data/news.json?t=${Date.now()}`)
+                ]);
+                if (annResp.ok) {
+                    const d = await annResp.json();
+                    if (Array.isArray(d)) announcements = d;
+                }
+                if (newsResp.ok) {
+                    const d = await newsResp.json();
+                    if (Array.isArray(d)) newsData = d;
+                }
+            } catch {}
             renderAnnouncements();
             renderNews();
             if (isLoggedIn) renderAdminPanel();
@@ -2594,8 +2466,8 @@
             isSaving = true;
             try {
                 const [r1, r2] = await Promise.all([
-                    writeJsonToGitHub('data/announcements.json', announcements, '更新公告'),
-                    writeJsonToGitHub('data/news.json', newsData, '更新新闻')
+                    saveJsonData('announcements.json', announcements),
+                    saveJsonData('news.json', newsData)
                 ]);
                 if (r1 && r2) {
                     showToast('保存成功', 'success');
@@ -2722,14 +2594,16 @@
 
         // ========== 退出登录 ==========
         function logout() {
+            fetch(`${API_BASE}/logout`, { method: 'POST', headers: authHeaders() }).catch(() => {});
             isLoggedIn = false;
-            githubToken = null;
-            githubUser = null;
-            sessionStorage.removeItem('github_token');
+            authToken = null;
+            authUser = null;
+            sessionStorage.removeItem('auth_token');
+            sessionStorage.removeItem('auth_user');
             document.getElementById('adminPanel').classList.remove('active');
             document.getElementById('adminLoginLink').innerHTML = '<i class="fas fa-user-shield"></i> 管理员';
             document.getElementById('adminLoginLink').style.background = '#0A2C4D';
-            document.getElementById('githubUserInfo').style.display = 'none';
+            document.getElementById('adminUserInfo').style.display = 'none';
             showToast('已退出登录', 'info');
         }
 
@@ -2825,7 +2699,7 @@
             let image = '';
             if (currentImageFile) {
                 showToast('正在上传图片...', 'info');
-                const imageUrl = await uploadImageToGitHub(currentImageFile);
+                const imageUrl = await uploadImage(currentImageFile);
                 if (imageUrl) {
                     image = imageUrl;
                 } else {
@@ -2949,11 +2823,17 @@
 
         // ========== 页面初始化 ==========
         window.addEventListener('load', async function() {
-            await handleOAuthCallback();
-            if (!isLoggedIn) restoreSession();
+            await restoreSession();
             await loadData();
             animateNumbers();
-            // 访问量接口当前存在跨域限制，这里先保留静态占位，避免影响页面浏览
+            // 加载访问计数
+            try {
+                const resp = await fetch(`${API_BASE}/counter`);
+                if (resp.ok) {
+                    const data = await resp.json();
+                    document.getElementById('pageViews').textContent = data.count;
+                }
+            } catch {}
         });
 
         // ========== 平滑滚动到锚点 ==========
