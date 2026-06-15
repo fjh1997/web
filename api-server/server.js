@@ -61,7 +61,12 @@ function readBody(req) {
 }
 
 function json(res, data, status = 200) {
-  res.writeHead(status, { 'Content-Type': 'application/json' });
+  res.writeHead(status, {
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+  });
   res.end(JSON.stringify(data));
 }
 
