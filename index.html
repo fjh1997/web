@@ -2849,7 +2849,10 @@
             animateNumbers();
             // 加载访问计数
             try {
-                const resp = await fetch(`${API_BASE}/counter`);
+                const resp = await fetch(`${API_BASE}/counter?t=${Date.now()}`, {
+                    cache: 'no-store',
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
                 if (resp.ok) {
                     const data = await resp.json();
                     document.getElementById('todayViews').textContent = data.today;
